@@ -1,0 +1,89 @@
+@import 'tailwindcss';
+@plugin '@tailwindcss/typography';
+
+:root {
+	--theme-color: 13, 13, 13;
+	--sidebar-color: 15, 15, 15;
+}
+
+@font-face {
+	font-family: 'Untitled Sans';
+	font-weight: normal;
+	src: url('/fonts/untitled-sans/untitled-sans-regular.woff2') format('woff2');
+}
+
+@font-face {
+	font-family: 'Gill Sans';
+	font-weight: normal;
+	src: url('/fonts/gill-sans/GillSans-01.woff2') format('woff2');
+}
+
+@font-face {
+	font-family: 'Campaign Grotesk';
+	font-weight: light;
+	src: url('/fonts/campaign-grotesk/Campaign_Light.ttf') format('truetype');
+}
+
+@utility no-scrollbar {
+	@apply [scrollbar-width:none] [&::-webkit-scrollbar]:hidden;
+}
+
+@theme {
+	--font-untitled: 'Untitled Sans', 'sans-serif';
+	--font-gill: 'Gill Sans', 'sans-serif';
+	--font-campaign: 'Campaign Grotesk', 'Untitled Sans', 'sans-serif';
+
+	--color-grey-100: rgba(245, 245, 245, 0.995);
+	--color-grey-150: rgba(245, 245, 245, 0.983);
+	--color-grey-175: rgba(245, 245, 245, 0.85);
+	--color-grey-200: rgba(245, 245, 245, 0.728);
+	--color-grey-300: rgba(245, 245, 245, 0.662);
+	--color-grey-350: rgba(245, 245, 245, 0.597);
+	--color-grey-400: rgba(245, 245, 245, 0.515);
+	--color-grey-425: rgba(245, 245, 245, 0.442);
+	--color-grey-450: rgba(245, 245, 245, 0.336);
+	--color-grey-500: rgba(245, 245, 245, 0.293);
+	--color-grey-600: rgba(245, 245, 245, 0.205);
+	--color-grey-700: rgba(245, 245, 245, 0.199);
+	--color-grey-750: rgba(245, 245, 245, 0.191);
+	--color-grey-800: rgba(245, 245, 245, 0.179);
+	--color-grey-900: rgba(245, 245, 245, 0.167);
+	--color-grey-1000: rgba(245, 245, 245, 0.06);
+	--color-grey-1100: rgba(245, 245, 245, 0.052);
+
+	--color-dark-100: rgba(147, 147, 147, 0.895);
+	--color-dark-150: rgba(147, 147, 147, 0.883);
+	--color-dark-175: rgba(147, 147, 147, 0.75);
+	--color-dark-200: rgba(147, 147, 147, 0.628);
+	--color-dark-300: rgba(147, 147, 147, 0.562);
+	--color-dark-400: rgba(147, 147, 147, 0.415);
+	--color-dark-425: rgba(147, 147, 147, 0.342);
+	--color-dark-450: rgba(147, 147, 147, 0.236);
+	--color-dark-500: rgba(147, 147, 147, 0.193);
+	--color-dark-600: rgba(147, 147, 147, 0.105);
+	--color-dark-700: rgba(147, 147, 147, 0.099);
+	--color-dark-750: rgba(147, 147, 147, 0.091);
+	--color-dark-800: rgba(147, 147, 147, 0.079);
+	--color-dark-900: rgba(147, 147, 147, 0.03);
+	--color-dark-1000: rgba(147, 147, 147, 0.06);
+	--color-dark-1100: rgba(147, 147, 147, 0.052);
+
+	--color-red-50: rgb(209, 95, 77);
+	--color-red-100: rgb(194, 62, 46);
+	--color-red-150: rgb(184, 67, 46);
+	--color-red-200: rgb(170, 72, 45);
+	--color-red-250: rgb(150, 65, 40);
+	--color-red-300: rgb(130, 57, 35);
+	--color-red-350: rgb(110, 50, 30);
+	--color-red-400: rgb(80, 23, 16);
+	--color-red-450: rgb(64, 20, 15);
+	--color-red-500: rgb(48, 16, 13);
+	--color-red-550: rgb(36, 12, 10);
+	--color-red-600: rgb(19, 7, 5);
+	--color-red-650: rgb(18, 6, 5);
+	--color-red-700: rgb(17, 6, 5);
+	--color-red-750: rgb(16, 5, 4);
+	--color-red-800: rgb(15, 5, 4);
+	--color-red-850: rgb(14, 4, 3);
+	--color-red-900: rgb(13, 3, 2);
+}

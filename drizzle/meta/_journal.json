@@ -50,6 +50,20 @@
       "when": 1749909290157,
       "tag": "0006_public_texas_twister",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1749910828203,
+      "tag": "0007_needy_namorita",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1749911036853,
+      "tag": "0008_closed_hairball",
+      "breakpoints": true
     }
   ]
 }

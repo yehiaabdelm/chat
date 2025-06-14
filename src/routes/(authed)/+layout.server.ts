@@ -14,7 +14,10 @@ export const load = (async ({ locals }) => {
 		});
 	};
 	const models = await db.query.models.findMany({
-		where: eq(tables.models.userId, locals?.user?.id as string)
+		where: eq(tables.models.active, true),
+		with: {
+			vendor: true
+		}
 	});
 	return {
 		user: locals.user,

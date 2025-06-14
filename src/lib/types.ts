@@ -1,3 +1,9 @@
+export type UnattachedFile = {
+	id: string;
+	fileName: string;
+	url: string;
+};
+
 export type FileWithUrl = {
 	id: string;
 	key: string;
@@ -8,10 +14,25 @@ export type FileWithUrl = {
 
 export type UploadFile = {
 	id: string;
-	fileName: string;
-	url: string;
-	status: 'uploaded' | 'uploading';
+	file: File;
+	url?: string;
 	progress: number;
+	status: 'uploading' | 'uploaded';
+};
+
+export type Model = {
+	name: string;
+	id: string;
+	createdAt: Date | null;
+	updatedAt: Date;
+	description: string | null;
+	modalities: ('text' | 'image' | 'audio')[];
+	vendorId: string | null;
+	active: boolean | null;
+	vendor: {
+		id: string;
+		name: string;
+	} | null;
 };
 
 export type Chat = {
@@ -55,20 +76,4 @@ export type MessageWithChildren = {
 		file: never | FileWithUrl | null;
 	}>;
 	children: string[];
-};
-
-export type Model = {
-	name: string;
-	vendor: 'openai' | 'anthropic';
-	description: string;
-	modalities: ('text' | 'image' | 'audio')[];
-	apiModelName: string;
-};
-
-export type Endpoint = {
-	name: string;
-	endpointType: 'openai' | 'anthropic';
-	endpointName: string;
-	baseUrl: string;
-	models: Model[];
 };

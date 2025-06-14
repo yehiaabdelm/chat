@@ -33,7 +33,10 @@
 	});
 </script>
 
-<div class="h-full flex-col p-3 pb-0 sm:w-88 md:flex" style="opacity: {buttonsOpacity.current};">
+<div
+	class="hidden h-full flex-col p-3 pb-0 sm:w-[30rem] md:flex"
+	style="opacity: {buttonsOpacity.current};"
+>
 	<div
 		class="grid justify-between gap-[0.2rem] px-[0.15rem] pb-3 md:grid-flow-col md:grid-rows-2 md:justify-items-start"
 		style="opacity: {buttonsOpacity.current};"

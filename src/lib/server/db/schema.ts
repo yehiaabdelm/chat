@@ -135,7 +135,6 @@ export const vendors = pgTable('vendors', {
 
 export const models = pgTable('models', {
 	id: uuid().primaryKey().defaultRandom(),
-	userId: uuid().references(() => users.id),
 	name: text().notNull(),
 	description: text(),
 	modalities: modalityEnum().array().notNull().default(['text']),
@@ -147,11 +146,9 @@ export const models = pgTable('models', {
 
 export const endpoints = pgTable('endpoints', {
 	id: uuid().primaryKey().defaultRandom(),
-	userId: uuid().references(() => users.id),
 	name: text().notNull(),
 	endpointType: endpointTypeEnum().notNull(),
 	baseUrl: text(),
-	apiKey: text(),
 	config: jsonb(),
 	active: boolean().default(true),
 	createdAt: timestamp().defaultNow(),
@@ -172,6 +169,23 @@ export const modelsEndpoints = pgTable(
 		updatedAt: timestamp({ mode: 'date', withTimezone: true }).notNull().defaultNow().$onUpdate(now)
 	},
 	(table) => [uniqueIndex('model_endpoint_unique').on(table.modelId, table.endpointId)]
+);
+
+export const userEndpoint = pgTable(
+	'user_endpoint',
+	{
+		id: uuid().primaryKey().defaultRandom(),
+		userId: uuid()
+			.notNull()
+			.references(() => users.id, { onDelete: 'cascade' }),
+		endpointId: uuid()
+			.notNull()
+			.references(() => endpoints.id, { onDelete: 'cascade' }),
+		apiKey: text().notNull(),
+		createdAt: timestamp().defaultNow(),
+		updatedAt: timestamp({ mode: 'date', withTimezone: true }).notNull().defaultNow().$onUpdate(now)
+	},
+	(table) => [uniqueIndex('user_endpoint_key_unique').on(table.userId, table.endpointId)]
 );
 
 // Relations
@@ -216,16 +230,11 @@ export const vendorsRelations = relations(vendors, ({ many }) => ({
 }));
 
 export const modelsRelations = relations(models, ({ one, many }) => ({
-	user: one(users, { fields: [models.userId], references: [users.id] }),
 	vendor: one(vendors, { fields: [models.vendorId], references: [vendors.id] }),
 	endpoints: many(modelsEndpoints)
 }));
 
-export const endpointsRelations = relations(endpoints, ({ one, many }) => ({
-	user: one(users, {
-		fields: [endpoints.userId],
-		references: [users.id]
-	}),
+export const endpointsRelations = relations(endpoints, ({ many }) => ({
 	models: many(modelsEndpoints)
 }));
 
@@ -244,6 +253,17 @@ export const filesRelations = relations(files, ({ one }) => ({
 	owner: one(users, { fields: [files.userId], references: [users.id] })
 }));
 
+export const userEndpointRelations = relations(userEndpoint, ({ one }) => ({
+	user: one(users, {
+		fields: [userEndpoint.userId],
+		references: [users.id]
+	}),
+	endpoint: one(endpoints, {
+		fields: [userEndpoint.endpointId],
+		references: [endpoints.id]
+	})
+}));
+
 export type User = typeof users.$inferSelect;
 export type Session = typeof sessions.$inferSelect;
 export type Chat = typeof chats.$inferSelect;
@@ -253,3 +273,4 @@ export type Content = typeof contents.$inferSelect;
 export type Model = typeof models.$inferSelect;
 export type Endpoint = typeof endpoints.$inferSelect;
 export type ModelToEndpoint = typeof modelsEndpoints.$inferSelect;
+export type UserEndpointKey = typeof userEndpoint.$inferSelect;

@@ -5,26 +5,20 @@
 	import { Spring } from 'svelte/motion';
 	import { fade } from 'svelte/transition';
 	import { springEasingFunction } from '$lib/ui/actions';
-	import type { UploadFile } from '$lib/types';
+	import type { FileWithUrl, UploadFile } from '$lib/types';
 
 	let {
-		isDragging,
-		isOverUploadArea,
-		uploadedFiles,
+		uploadedFiles = [],
+		isDragging = true,
 		removeFile
 	}: {
+		uploadedFiles: (UploadFile | FileWithUrl)[];
 		isDragging: boolean;
-		isOverUploadArea: boolean;
-		ondragover: () => void;
-		ondragleave: () => void;
-		ondrop: () => void;
-		uploadedFiles: UploadFile[];
 		removeFile: (id: string) => void;
 	} = $props();
 
 	let uploadFilesHeight = new Spring(0, { stiffness: 0.1, damping: 0.8 });
 	let uploadFilesOpacity = new Spring(0, { stiffness: 0.3, damping: 0.8 });
-	let uploadTextOpacity = new Spring(0.7, { stiffness: 0.1, damping: 0.8 });
 
 	$effect(() => {
 		if (isDragging || uploadedFiles.length > 0) {
@@ -33,14 +27,6 @@
 		} else {
 			uploadFilesHeight.set(0);
 			uploadFilesOpacity.set(0);
-		}
-	});
-
-	$effect(() => {
-		if (isOverUploadArea) {
-			uploadTextOpacity.set(1);
-		} else {
-			uploadTextOpacity.set(0.7);
 		}
 	});
 </script>
@@ -56,18 +42,18 @@
 		<!-- svelte-ignore attribute_global_event_reference -->
 		<!-- svelte-ignore a11y_no_static_element_interactions -->
 		<div
-			class="flex h-full w-full flex-col items-center justify-center gap-1"
+			class="flex h-full w-full flex-col items-center justify-center gap-2"
 			{ondragover}
 			{ondragleave}
 			{ondrop}
 		>
-			<div class="flex items-center justify-center gap-2" style="opacity: {$uploadTextOpacity}">
+			<div class="flex items-center justify-center gap-2">
 				<Photo />
 				<p class="font-gill text-md tracking-[2.3px] text-white uppercase antialiased">
 					Drop photos
 				</p>
 			</div>
-			<p class="font-untitled text-grey-500 text-3xs tracking-[1.5px] uppercase antialiased">
+			<p class="font-untitled text-grey-500 text-xs tracking-[1.5px] uppercase antialiased">
 				Max 10 photos per chat at 20mb each
 			</p>
 		</div>
@@ -79,20 +65,25 @@
 					transition:fade={{ duration: 300, easing: springEasingFunction }}
 				>
 					<div class="bg-grey-600 h-24 w-48 overflow-hidden rounded-xl">
-						{#if file.status === 'uploaded'}
+						{#if 'status' in file && file.status === 'uploaded'}
 							<img
 								src={file.url}
-								alt={file.fileName}
+								class="fade-in h-full w-full object-cover"
+								style="opacity: 1; -webkit-transition: opacity 2s ease-in-out;"
+							/>
+						{:else if !('status' in file) && file.url}
+							<img
+								src={file.url}
 								class="fade-in h-full w-full object-cover"
 								style="opacity: 1; -webkit-transition: opacity 2s ease-in-out;"
 							/>
 						{/if}
-						{#if file.status === 'uploading'}
+						{#if 'status' in file && file.status === 'uploading'}
 							<UploadingFile progress={file.progress} />
 						{/if}
 					</div>
 					<button
-						class="absolute top-1 right-1 flex h-5 w-5 items-center justify-center rounded-full bg-white opacity-65"
+						class="absolute top-1 right-1 flex h-5 w-5 cursor-pointer items-center justify-center rounded-full bg-white opacity-65"
 						onclick={() => removeFile(file.id)}
 					>
 						<X />

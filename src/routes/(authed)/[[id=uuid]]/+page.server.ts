@@ -4,7 +4,7 @@ import { and, eq, isNull } from 'drizzle-orm';
 import * as tables from '$lib/server/db/schema';
 import { redirect } from '@sveltejs/kit';
 import { mapMessagesWithChildren } from '$lib/server/chat';
-import { signFile } from '$lib/server/file';
+import { generateSignature } from '$lib/server/s3';
 import type { FileWithUrl } from '$lib/types';
 
 export const load = (async ({ params, locals }) => {
@@ -12,7 +12,7 @@ export const load = (async ({ params, locals }) => {
 		redirect(302, '/login');
 	}
 
-	const unusedFiles = (await db
+	const unattachedFiles = (await db
 		.select({
 			id: tables.files.id,
 			key: tables.files.key,
@@ -28,8 +28,8 @@ export const load = (async ({ params, locals }) => {
 			)
 		)) as FileWithUrl[];
 	await Promise.all(
-		unusedFiles.map(async (file) => {
-			file.url = await signFile(file.key);
+		unattachedFiles.map(async (file) => {
+			file.url = await generateSignature(file.key);
 		})
 	);
 
@@ -77,7 +77,7 @@ export const load = (async ({ params, locals }) => {
 				Promise.all(
 					msg.contents.map(async (c) => {
 						if (c.type === 'file' && c.file) {
-							(c.file as FileWithUrl).url = await signFile((c.file as FileWithUrl).key);
+							(c.file as FileWithUrl).url = await generateSignature((c.file as FileWithUrl).key);
 						}
 					})
 				)
@@ -85,7 +85,7 @@ export const load = (async ({ params, locals }) => {
 		);
 
 		return {
-			unusedFiles,
+			unattachedFiles,
 			chat: {
 				...chat,
 				messages: mapMessagesWithChildren(chat.messages)
@@ -93,6 +93,6 @@ export const load = (async ({ params, locals }) => {
 		};
 	}
 	return {
-		unusedFiles
+		unattachedFiles
 	};
 }) satisfies PageServerLoad;

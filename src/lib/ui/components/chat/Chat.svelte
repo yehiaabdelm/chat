@@ -1,14 +1,24 @@
 <script lang="ts">
-	import type { Chat as ChatType, MessageWithChildren, UploadFile } from '$lib/types';
+	import type { Chat as ChatType, Model, FileWithUrl, UploadFile } from '$lib/types';
 	import ChatMessage from './ChatMessage.svelte';
 	import { forward, backward } from '$lib/chat';
 	import { Chat } from '@ai-sdk/svelte';
-	import ImageUploadArea from './ImageUploadArea.svelte';
-	let { chat }: { chat?: ChatType } = $props();
+	import FileUploadArea from './FileUploadArea.svelte';
+	import { v7 as uuid } from 'uuid';
+	import { uploadFile, deleteFile } from '$lib/file';
+	import ErrorMessage from '../ErrorMessage.svelte';
+	import ModelsPanel from './ModelsPanel.svelte';
+	import BottomModelsPanel from './BottomModelsPanel.svelte';
+
+	let {
+		models,
+		chat,
+		unattachedFiles = []
+	}: { models: Model[]; chat?: ChatType; unattachedFiles: FileWithUrl[] } = $props();
 
 	let isDragging = $state(false);
-	let isOverUploadArea = $state(false);
-	// let uploadedImages = $state<UploadImage[]>([]);
+	let uploadedFiles = $state<(UploadFile | FileWithUrl)[]>(unattachedFiles);
+	let errorMessage = $state('');
 
 	let useChat = new Chat();
 
@@ -23,6 +33,49 @@
 		// }
 	}
 
+	const handleDrop = async (event: DragEvent) => {
+		isDragging = false;
+		event.preventDefault();
+		if (event?.dataTransfer && event?.dataTransfer?.files) {
+			const files = event.dataTransfer.files;
+			for (let i = 0; i < files.length; i++) {
+				const file = files[i];
+				const id = uuid();
+				if (file.type.startsWith('image/')) {
+					try {
+						const placeholderFile = {
+							id,
+							file,
+							status: 'uploading' as const,
+							progress: 0
+						};
+						uploadedFiles = [...uploadedFiles, placeholderFile];
+						const uploadedFile = await uploadFile(file, id, (progress) => {
+							uploadedFiles = uploadedFiles.map((file) =>
+								file.id === id ? { ...file, progress } : file
+							);
+						});
+						uploadedFiles = uploadedFiles.map((file) =>
+							file.id === id ? { ...uploadedFile, status: 'uploaded' } : file
+						);
+					} catch (error) {
+						if (error instanceof Error) {
+							errorMessage = error.message;
+							setTimeout(() => (errorMessage = ''), 5000);
+						}
+						// Remove the placeholder if upload fails
+						uploadedFiles = uploadedFiles.filter((file) => file.id !== id);
+					}
+				}
+			}
+		}
+	};
+
+	const removeImage = async (id: string) => {
+		await deleteFile(id);
+		uploadedFiles = uploadedFiles.filter((file) => file.id !== id);
+	};
+
 	let chatContainer: HTMLDivElement;
 	let input = $state('');
 	let isChatOpen = $state(true);
@@ -34,16 +87,18 @@
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
-	class="flex h-full max-md:mx-8 max-sm:mx-4 lg:mx-auto lg:pt-[1.3125rem] {isChatOpen
-		? ''
-		: 'hidden'}"
-	ondragover={() => (isOverUploadArea = true)}
-	ondragleave={() => {
+	class="flex h-full w-full justify-center max-md:mx-8 max-sm:mx-4 lg:mx-auto lg:pt-[1.3125rem]"
+	ondragover={(e) => {
+		e.preventDefault();
+		e.stopPropagation();
+		isDragging = true;
+	}}
+	ondrop={handleDrop}
+	ondragleave={(e) => {
 		setTimeout(() => {
 			isDragging = false;
-		}, 1000);
+		}, 2000);
 	}}
-	ondrop={() => (isOverUploadArea = false)}
 >
 	<div class="no-scrollbar relative flex w-full flex-col overflow-scroll lg:w-[43rem]">
 		{#if chat}
@@ -100,7 +155,7 @@
 			</div> -->
 		{:else}
 			<div class="flex flex-1 flex-col items-center justify-center" style="opacity: 1;">
-				<!-- <ModelsPanel on:click {models} /> -->
+				<ModelsPanel {models} />
 			</div>
 		{/if}
 		<div
@@ -108,36 +163,27 @@
       justify-center rounded-xl bg-[rgba(var(--theme-color),1)] placeholder:text-center"
 			style="transition: box-shadow 1s ease, background-color 1s ease; backdrop-filter: blur(10px); box-shadow: 0px 2px 30px 20px rgba(var(--theme-color), 1);"
 		>
-			<!-- {#if showError}
+			{#if errorMessage}
 				<ErrorMessage message={errorMessage} />
-			{/if} -->
+			{/if}
 			<div class="relative">
-				<ImageUploadArea
-					{isDragging}
-					{isOverUploadArea}
-					uploadedFiles={[]}
-					removeFile={() => {}}
-					ondragover={() => (isOverUploadArea = true)}
-					ondragleave={() => (isOverUploadArea = false)}
-					ondrop={() => (isOverUploadArea = false)}
-				/>
+				<FileUploadArea {isDragging} {uploadedFiles} removeFile={removeImage} />
 				<div
 					class="relative rounded-xl"
 					style="background: linear-gradient(rgba(255,255,255,0.01), rgba(255,255,255,0.01)), linear-gradient(rgba(var(--theme-color), 1), rgba(var(--theme-color), 1));"
 				>
-					<div class="pt-1">
+					<div class="px-3 pt-1">
 						{#if chat}
-							<!-- <div>
 							<BottomModelsPanel {models} />
-						</div> -->
 						{/if}
+						<div class="flex flex-wrap gap-2"></div>
 						<textarea
 							bind:value={input}
 							onkeydown={submit}
-							class="text-grey-200 font-untitled placeholder:font-untitled placeholder:text-grey-450
-                                tt-scroll-bar-v my-auto field-sizing-content
-                                max-h-[35rem] w-full resize-none bg-transparent py-3 antialiased outline-none
-                                placeholder:antialiased sm:text-base"
+							class="text-grey-200 font-untitled placeholder:font-untitled placeholder:text-grey-450 tt-scroll-bar-v
+							sm:text-base] my-auto
+							field-sizing-content max-h-[35rem] w-full resize-none bg-transparent py-3 antialiased
+							outline-none placeholder:antialiased"
 							style="transition: background-color 1s ease;"
 							placeholder="Send a message"
 						></textarea>

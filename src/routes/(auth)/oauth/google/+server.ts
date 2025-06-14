@@ -64,41 +64,6 @@ export const GET: RequestHandler = async (event) => {
 			providerId: googleUserId,
 			data: claims
 		});
-
-		for (const endpoint of DEFAULT_ENDPOINTS) {
-			const [{ id: endpointId }] = await tx
-				.insert(table.endpoints)
-				.values({
-					userId: user.id,
-					name: endpoint.name,
-					endpointType: endpoint.endpointType as 'openai' | 'anthropic',
-					baseUrl: endpoint.baseUrl,
-					apiKey: ''
-				})
-				.returning({ id: table.endpoints.id });
-
-			for (const modelConfig of endpoint.models) {
-				const vendor = await tx.query.vendors.findFirst({
-					where: eq(table.vendors.name, modelConfig.vendor)
-				});
-				const [{ id: modelId }] = await tx
-					.insert(table.models)
-					.values({
-						userId: user.id,
-						name: modelConfig.name,
-						vendorId: vendor?.id,
-						description: modelConfig.description,
-						modalities: modelConfig.modalities,
-						active: true
-					})
-					.returning({ id: table.models.id });
-				await tx.insert(table.modelsEndpoints).values({
-					modelId,
-					endpointId,
-					endpointModelName: modelConfig.apiModelName
-				});
-			}
-		}
 		return { user };
 	});
 	const sessionToken = generateSessionToken();

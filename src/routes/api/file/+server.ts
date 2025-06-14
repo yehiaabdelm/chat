@@ -1,22 +1,21 @@
 import type { RequestHandler } from './$types';
 import { json } from '@sveltejs/kit';
 import { s3Client, generateSignature } from '$lib/server/s3';
-import { ObjectCannedACL, DeleteObjectCommand } from '@aws-sdk/client-s3';
+import { DeleteObjectCommand } from '@aws-sdk/client-s3';
 import { Upload } from '@aws-sdk/lib-storage';
 import { env } from '$env/dynamic/private';
-import { checkUserStatus } from '$lib/server/utils';
-import { mimeToExt } from '$lib/server/utils';
+import { mimeToExt } from '$lib/file';
 import sharp from 'sharp';
 import * as tables from '$lib/server/db/schema';
 import { and, eq, isNull } from 'drizzle-orm';
 import { db } from '$lib/server/db';
-import type { FileWithUrl } from '$lib/types';
 
 export const POST: RequestHandler = async ({ locals, request }) => {
 	if (!locals.user) {
 		return json({ message: 'Unauthorized' }, { status: 401 });
 	}
-	const unusedFiles = (await db
+	let userId = locals.user.id;
+	const unusedFiles = await db
 		.select({
 			id: tables.files.id,
 			key: tables.files.key,
@@ -25,12 +24,7 @@ export const POST: RequestHandler = async ({ locals, request }) => {
 		})
 		.from(tables.files)
 		.leftJoin(tables.contents, eq(tables.contents.fileId, tables.files.id))
-		.where(
-			and(
-				eq(tables.files.userId, locals.user.id), // current user
-				isNull(tables.contents.fileId) // not attached yet
-			)
-		)) as FileWithUrl[];
+		.where(and(eq(tables.files.userId, locals.user.id), isNull(tables.contents.fileId)));
 
 	if (unusedFiles.length > 4) {
 		return json({ message: 'You can only upload 4 files at a time' }, { status: 400 });
@@ -74,11 +68,10 @@ export const POST: RequestHandler = async ({ locals, request }) => {
 	const { width, height } = metadata;
 
 	const putObjectParams = {
-		Bucket: env.DIGITALOCEAN_SPACES_BUCKET,
+		Bucket: env.AWS_S3_BUCKET,
 		Key: key,
 		Body: Buffer.from(fileBuffer),
 		ContentType: file.type,
-		ACL: ObjectCannedACL.authenticated_read,
 		Metadata: {
 			...(width?.toString() && { width: width?.toString() }),
 			...(height?.toString() && { height: height?.toString() }),
@@ -103,24 +96,27 @@ export const POST: RequestHandler = async ({ locals, request }) => {
 				upload
 					.done()
 					.then(async () => {
-						const sig = await generateSignature(key);
+						const url = await generateSignature(key);
 						controller.enqueue(
 							`data: ${JSON.stringify({
 								id,
-								key,
-								sig,
-								width: width,
-								height: height,
-								file_size: file.size,
-								file_name: file.name,
+								url,
 								status: 'uploaded',
 								progress: 100
 							})}\n\n`
 						);
+						await db.insert(tables.files).values({
+							userId,
+							id,
+							key,
+							mimeType: file.type,
+							sizeBytes: file.size
+						});
 						controller.close();
 					})
-					.catch((error) => {
+					.catch(async (error) => {
 						console.error('Failed to upload image - ', error);
+						await db.delete(tables.files).where(eq(tables.files.id, id));
 						controller.error(error);
 					});
 			}
@@ -152,11 +148,12 @@ export const DELETE: RequestHandler = async ({ request, locals }) => {
 		return json({ message: 'File not found' }, { status: 404 });
 	}
 	const deleteParams = {
-		Bucket: env.DIGITALOCEAN_SPACES_BUCKET,
+		Bucket: env.AWS_S3_BUCKET,
 		Key: file.key
 	};
 	try {
 		await s3Client.send(new DeleteObjectCommand(deleteParams));
+		await db.delete(tables.files).where(eq(tables.files.id, id));
 		return json({ message: 'File deleted' });
 	} catch (error) {
 		console.error('Error deleting file:', error);

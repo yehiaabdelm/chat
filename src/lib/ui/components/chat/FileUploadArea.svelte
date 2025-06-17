@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Photo from '$lib/ui/icons/Photo.svelte';
 	import X from '$lib/ui/icons/X.svelte';
+	import Image from './Image.svelte';
 	import UploadingFile from './UploadingFile.svelte';
 	import { Spring } from 'svelte/motion';
 	import { fade } from 'svelte/transition';
@@ -32,7 +33,8 @@
 </script>
 
 <div
-	class="relative flex -translate-y-[-1rem]
+	class="relative flex
+	-translate-y-[-1rem]
     items-start
     rounded-t-[1rem]"
 	style="height: {uploadFilesHeight.current}rem; background: linear-gradient(rgba(245, 245, 245, 0.03), rgba(245, 245, 245, 0.03)), linear-gradient(rgba(var(--theme-color), 1), rgba(var(--theme-color), 1));"
@@ -58,25 +60,15 @@
 			</p>
 		</div>
 	{:else}
-		<div class="scrollbar-none flex items-start overflow-y-auto">
-			{#each uploadedFiles as file, index (file.id)}
+		<div class="no-scrollbar flex items-start overflow-y-auto">
+			{#each uploadedFiles as file, i (file.id)}
 				<div
 					class="relative m-2 mr-1 mb-0"
 					transition:fade={{ duration: 300, easing: springEasingFunction }}
 				>
 					<div class="bg-grey-600 h-24 w-48 overflow-hidden rounded-xl">
-						{#if 'status' in file && file.status === 'uploaded'}
-							<img
-								src={file.url}
-								class="fade-in h-full w-full object-cover"
-								style="opacity: 1; -webkit-transition: opacity 2s ease-in-out;"
-							/>
-						{:else if !('status' in file) && file.url}
-							<img
-								src={file.url}
-								class="fade-in h-full w-full object-cover"
-								style="opacity: 1; -webkit-transition: opacity 2s ease-in-out;"
-							/>
+						{#if ('status' in file && file.status === 'uploaded') || (!('status' in file) && file.url)}
+							<Image src={file.url ?? ''} alt="Uploaded file" />
 						{/if}
 						{#if 'status' in file && file.status === 'uploading'}
 							<UploadingFile progress={file.progress} />

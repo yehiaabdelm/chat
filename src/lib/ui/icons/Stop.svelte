@@ -1,6 +1,6 @@
 <script lang="ts">
 	import TextIcon from './TextIcon.svelte';
-	let { text = 'stop' } = $props();
+	let { text = 'stop', onclick }: { text?: string; onclick: () => void } = $props();
 </script>
 
 {#snippet icon()}
@@ -26,4 +26,4 @@
 	</svg>
 {/snippet}
 
-<TextIcon children={icon} {text} />
+<TextIcon {onclick} children={icon} {text} />

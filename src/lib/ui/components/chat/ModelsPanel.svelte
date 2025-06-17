@@ -14,8 +14,10 @@
 	});
 </script>
 
-<div class="flex flex-col items-center gap-y-4" style="opacity: {opacity.current}">
-	<p class="font-gill text-grey-300 text-[0.7rem] tracking-[3px] uppercase antialiased">
+<div class="flex flex-col gap-y-4" style="opacity: {opacity.current}">
+	<p
+		class="font-gill text-grey-300 text-left text-[0.7rem] tracking-[3px] uppercase antialiased md:text-center"
+	>
 		Select a model
 	</p>
 	<div class="text-grey-150 grid grid-rows-2 lg:grid-flow-col" style="grid-column-gap: 3rem;">

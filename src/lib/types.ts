@@ -1,3 +1,11 @@
+export type User = {
+	id: string;
+	email: string;
+	firstName: string | null;
+	lastName: string | null;
+	avatarUrl: string | null;
+};
+
 export type UnattachedFile = {
 	id: string;
 	fileName: string;
@@ -42,31 +50,23 @@ export type Chat = {
 	userId: string;
 	title: string;
 	rootMessageId: string | null;
-	currentMessageId: string | null;
+	leafMessageId: string | null;
 	saved: boolean | null;
 	generations: number | null;
 	deleteAfter: Date | null;
 	messages: {
-		[id: string]: MessageWithChildren;
+		[id: string]: Message;
 	};
 };
 
-export type ChatTitle = {
-	id: string;
-	rootMessageId: string | null;
-	title: string;
-	createdAt: Date | null;
-	updatedAt: Date;
-	userId: string;
-	currentMessageId: string | null;
-	saved: boolean | null;
-	generations: number | null;
-	deleteAfter: Date | null;
-};
-export type MessageWithChildren = {
+export type Message = {
 	id: string;
 	parentId: string | null;
-	authorRole: string;
+	authorRole: 'user' | 'assistant' | 'system';
+	model: {
+		id: string;
+		name: string;
+	} | null;
 	createdAt: Date | null;
 	updatedAt: Date;
 	contents: Array<{
@@ -76,4 +76,17 @@ export type MessageWithChildren = {
 		file: never | FileWithUrl | null;
 	}>;
 	children: string[];
+};
+
+export type ChatTitle = {
+	id: string;
+	rootMessageId: string | null;
+	title: string;
+	createdAt: Date | null;
+	updatedAt: Date;
+	userId: string;
+	leafMessageId: string | null;
+	saved: boolean | null;
+	generations: number | null;
+	deleteAfter: Date | null;
 };

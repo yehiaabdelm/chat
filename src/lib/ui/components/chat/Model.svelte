@@ -46,7 +46,12 @@
 	}}
 >
 	<div class="h-[1.6rem] w-3">
-		<svelte:component this={getLogo(model.vendor?.name ?? '')} />
+		{#if model.vendor?.name}
+			{@const Logo = getLogo(model.vendor?.name)}
+			<Logo />
+		{:else}
+			<OpenAI />
+		{/if}
 	</div>
 	<p
 		class="text-grey-150 font-gill hover:text-grey-150 text-start text-[0.6rem] tracking-[2.5px] whitespace-nowrap uppercase antialiased"

@@ -1,9 +1,17 @@
 <script lang="ts">
 	import TextIcon from './TextIcon.svelte';
-	let { disabled = false, status = false }: { disabled: boolean; status: boolean } = $props();
+	let {
+		onclick,
+		disabled = false,
+		status
+	}: {
+		onclick: () => void;
+		disabled?: boolean;
+		status?: boolean;
+	} = $props();
 </script>
 
-<TextIcon children={icon} text={status ? 'copied' : 'copy'} {disabled} />
+<TextIcon {onclick} children={icon} text={status ? 'copied' : 'copy'} {disabled} />
 
 {#snippet icon()}
 	<svg

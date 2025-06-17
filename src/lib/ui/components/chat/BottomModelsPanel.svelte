@@ -34,7 +34,7 @@
 <div class="z-20 pt-[0.1rem]" style="opacity: {opacity.current}">
 	<!-- svelte-ignore a11y-mouse-events-have-key-events -->
 	<div
-		class="text-grey-150 scrollbar-none flex gap-5 overflow-y-auto"
+		class="text-grey-150 no-scrollbar flex gap-5 overflow-y-auto"
 		bind:this={scrollContainer}
 		onscroll={handleScroll}
 		style="position: relative; mask-image: linear-gradient(to right, rgba(0, 0, 0, 1) {fadeOpacity.current *

@@ -2,16 +2,19 @@
 	import TextIcon from './TextIcon.svelte';
 	let {
 		active = false,
+		height = '0.8rem',
+		width = '0.8rem',
 		href = '',
 		text = ''
-	}: { active: boolean; href: string; text: string } = $props();
+	}: { active: boolean; href: string; text: string; height?: string; width?: string } = $props();
 </script>
 
 <TextIcon children={icon} {text} {href} {active} />
 
 {#snippet icon()}
 	<svg
-		class="h-[0.8rem] w-[0.8rem]"
+		{height}
+		{width}
 		viewBox="0 0 14 13"
 		version="1.1"
 		xmlns="http://www.w3.org/2000/svg"

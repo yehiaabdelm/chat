@@ -1,9 +1,9 @@
-import type { MessageWithChildren } from '$lib/types';
+import type { Message } from '$lib/types';
 
 export const mapMessagesWithChildren = (
-	messages: Array<Omit<MessageWithChildren, 'children'>>
-): Record<string, MessageWithChildren> => {
-	const map: Record<string, MessageWithChildren> = {};
+	messages: Array<Omit<Message, 'children'>>
+): Record<string, Message> => {
+	const map: Record<string, Message> = {};
 	for (const msg of messages) {
 		map[msg.id] = { ...msg, children: [] };
 	}

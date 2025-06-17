@@ -46,6 +46,12 @@ export const load = (async ({ params, locals }) => {
 						updatedAt: true
 					},
 					with: {
+						model: {
+							columns: {
+								id: true,
+								name: true
+							}
+						},
 						contents: {
 							columns: {
 								id: true,

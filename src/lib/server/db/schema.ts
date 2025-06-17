@@ -56,13 +56,13 @@ export const sessions = pgTable('session', {
 export const chats = pgTable(
 	'chats',
 	{
-		id: uuid().primaryKey(),
+		id: uuid().defaultRandom().primaryKey(),
 		userId: uuid()
 			.notNull()
 			.references(() => users.id),
 		title: text().notNull(),
 		rootMessageId: uuid().references((): AnyPgColumn => messages.id),
-		currentMessageId: uuid().references((): AnyPgColumn => messages.id),
+		leafMessageId: uuid().references((): AnyPgColumn => messages.id),
 		saved: boolean().default(false),
 		generations: integer().default(0),
 		deleteAfter: timestamp(),
@@ -81,7 +81,7 @@ export const messages = pgTable(
 			.notNull()
 			.references(() => chats.id, { onDelete: 'cascade' }),
 		parentId: uuid().references((): AnyPgColumn => messages.id, { onDelete: 'set null' }),
-		authorRole: authorRoleEnum().notNull(),
+		role: authorRoleEnum().notNull(),
 		modelId: uuid().references(() => models.id, { onDelete: 'restrict' }),
 		status: text(),
 		createdAt: timestamp().defaultNow(),
@@ -189,9 +189,39 @@ export const userEndpoint = pgTable(
 );
 
 // Relations
+export const usersRelations = relations(users, ({ many }) => ({
+	oauth: many(oauth),
+	sessions: many(sessions),
+	chats: many(chats),
+	files: many(files),
+	userEndpoints: many(userEndpoint)
+}));
+
+export const oauthRelations = relations(oauth, ({ one }) => ({
+	user: one(users, {
+		fields: [oauth.userId],
+		references: [users.id]
+	})
+}));
+
+export const sessionsRelations = relations(sessions, ({ one }) => ({
+	user: one(users, {
+		fields: [sessions.userId],
+		references: [users.id]
+	})
+}));
+
 export const chatsRelations = relations(chats, ({ one, many }) => ({
-	currentMessage: one(messages, {
-		fields: [chats.currentMessageId],
+	user: one(users, {
+		fields: [chats.userId],
+		references: [users.id]
+	}),
+	rootMessage: one(messages, {
+		fields: [chats.rootMessageId],
+		references: [messages.id]
+	}),
+	leafMessage: one(messages, {
+		fields: [chats.leafMessageId],
 		references: [messages.id]
 	}),
 	messages: many(messages)
@@ -235,7 +265,8 @@ export const modelsRelations = relations(models, ({ one, many }) => ({
 }));
 
 export const endpointsRelations = relations(endpoints, ({ many }) => ({
-	models: many(modelsEndpoints)
+	models: many(modelsEndpoints),
+	userEndpoints: many(userEndpoint)
 }));
 
 export const modelsToEndpointsRelations = relations(modelsEndpoints, ({ one }) => ({

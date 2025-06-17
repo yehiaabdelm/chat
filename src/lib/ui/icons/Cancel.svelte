@@ -1,6 +1,6 @@
 <script lang="ts">
 	import TextIcon from './TextIcon.svelte';
-	let { text = 'cancel', onclick }: { text: string; onclick?: () => void } = $props();
+	let { text = 'cancel', onclick }: { text?: string; onclick?: () => void } = $props();
 </script>
 
 <TextIcon children={icon} {text} {onclick} />

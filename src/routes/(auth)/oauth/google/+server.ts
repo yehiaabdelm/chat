@@ -7,6 +7,7 @@ import * as table from '$lib/server/db/schema';
 import { and, eq } from 'drizzle-orm';
 import { redirect } from '@sveltejs/kit';
 import { DEFAULT_ENDPOINTS } from '$lib/server/defaultData';
+import { env } from '$env/dynamic/private';
 
 export const GET: RequestHandler = async (event) => {
 	const code = event.url.searchParams.get('code');
@@ -57,12 +58,16 @@ export const GET: RequestHandler = async (event) => {
 				email: (claims as any).email as string
 			})
 			.returning();
-
 		await tx.insert(table.oauth).values({
 			userId: user.id,
 			provider: 'google',
 			providerId: googleUserId,
 			data: claims
+		});
+		await tx.insert(table.userEndpoint).values({
+			userId: user.id,
+			endpointId: '77536ae3-c772-4d3d-adca-21d3d084ee93',
+			apiKey: env.OPENAI_API_KEY
 		});
 		return { user };
 	});

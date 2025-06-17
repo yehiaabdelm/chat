@@ -25,11 +25,13 @@
 	</div>
 	<div class="flex h-full flex-col max-md:pt-8 lg:flex-row">
 		<SidebarV2 bind:chats />
+		<!-- {#key data.chat} -->
 		<Chat
 			chat={data.chat}
 			unattachedFiles={data.unattachedFiles}
 			models={data.models}
 			user={data.user}
 		/>
+		<!-- {/key} -->
 	</div>
 </div>

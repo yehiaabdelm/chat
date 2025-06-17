@@ -41,7 +41,7 @@ export const load = (async ({ params, locals }) => {
 					columns: {
 						id: true,
 						parentId: true,
-						authorRole: true,
+						role: true,
 						createdAt: true,
 						updatedAt: true
 					},

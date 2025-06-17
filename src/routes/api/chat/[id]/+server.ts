@@ -2,6 +2,116 @@ import type { RequestHandler } from './$types';
 import { db } from '$lib/server/db';
 import * as tables from '$lib/server/db/schema';
 import { eq, and } from 'drizzle-orm';
+import type { Message } from '$lib/server/db/schema';
+import { json } from '@sveltejs/kit';
+import { createOpenAI } from '@ai-sdk/openai';
+import { createAnthropic } from '@ai-sdk/anthropic';
+import { streamText } from 'ai';
+import { transformMessage, writeMessage } from '$lib/server/chat';
+import type { CoreMessage } from 'ai';
+
+export const POST: RequestHandler = async ({ request, locals }) => {
+	if (!locals.user) {
+		return json({ error: 'Unauthorized' }, { status: 401 });
+	}
+	const {
+		id,
+		messages,
+		modelId,
+		action,
+		assistantMessageId
+	}: {
+		id: string;
+		modelId: string;
+		action: 'new' | 'regenerate';
+		messages: Message[];
+		assistantMessageId: string;
+	} = await request.json();
+
+	const chat = await db.query.chats.findFirst({
+		where: and(eq(tables.chats.id, id), eq(tables.chats.userId, locals.user!.id)),
+		columns: { id: true }
+	});
+
+	if (!chat) {
+		return json({ error: 'Chat not found or access denied' }, { status: 404 });
+	}
+
+	const model = await db.query.models.findFirst({
+		where: eq(tables.models.id, modelId),
+		columns: {
+			id: true
+		},
+		with: {
+			endpoints: {
+				with: {
+					endpoint: {
+						columns: {
+							name: true
+						},
+						with: {
+							userEndpoints: {
+								where: eq(tables.userEndpoint.userId, locals.user!.id),
+								columns: {
+									apiKey: true
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	});
+
+	if (!model) {
+		return json({ error: 'Model not found' }, { status: 404 });
+	}
+
+	const firstEndpoint = model.endpoints[0];
+	if (!firstEndpoint || !firstEndpoint.endpoint.userEndpoints.length) {
+		return json({ error: 'No endpoint configuration found' }, { status: 404 });
+	}
+
+	const endpointConfig = firstEndpoint.endpoint;
+	const apiKey = endpointConfig.userEndpoints[0].apiKey;
+	const modelName = firstEndpoint.endpointModelName;
+
+	let aiClient;
+	if (endpointConfig.name === 'OpenAI') {
+		aiClient = createOpenAI({
+			apiKey: apiKey
+		});
+	} else if (endpointConfig.name === 'Anthropic') {
+		aiClient = createAnthropic({
+			apiKey: apiKey
+		});
+	} else {
+		return json({ error: 'Unsupported endpoint type' }, { status: 400 });
+	}
+
+	const coreMessages: CoreMessage[] = await Promise.all(
+		messages.map((message) => transformMessage(message, locals?.user?.id))
+	);
+
+	const result = streamText({
+		model: aiClient(modelName),
+		messages: coreMessages.slice(-locals.user.messageWindow),
+		onFinish: async (result) => {
+			await writeMessage({
+				action,
+				chatId: id,
+				userMessage: messages[messages.length - 1],
+				assistantMessageId,
+				assistantText: result.text
+			});
+		},
+		onError: async (error) => {
+			// console.error('AI streaming error:', error);
+		}
+	});
+
+	return result.toDataStreamResponse();
+};
 
 export const PATCH: RequestHandler = async ({ locals, params, request }) => {
 	if (!locals.user) {

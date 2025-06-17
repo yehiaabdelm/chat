@@ -37,7 +37,9 @@ export async function validateSessionToken(token: string) {
 				email: table.users.email,
 				firstName: table.users.firstName,
 				lastName: table.users.lastName,
-				avatarUrl: table.users.avatarUrl
+				avatarUrl: table.users.avatarUrl,
+				messageWindow: table.users.messageWindow,
+				tempChatDeleteHours: table.users.tempChatDeleteHours
 			},
 			session: table.sessions
 		})

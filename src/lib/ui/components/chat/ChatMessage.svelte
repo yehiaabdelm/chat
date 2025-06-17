@@ -63,8 +63,11 @@
 	let messageElement: HTMLDivElement;
 	let editText = $state(contents[contents.length - 1]?.text ?? '');
 
-	console.log(contents);
 	onMount(async () => {
+		messageY.set(0);
+		messageOpacity.set(1);
+		messageBlur.set(0);
+
 		if (scrollToMessage) {
 			setTimeout(() => {
 				messageElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -84,10 +87,6 @@
 		stiffness: 0.1,
 		damping: 0.8
 	});
-
-	messageY.set(0);
-	messageOpacity.set(1);
-	messageBlur.set(0);
 
 	let editMode = $state(false);
 	let transitioning = $state(true);
@@ -143,7 +142,7 @@
 			style="transition: background-color 1s ease;"
 		>
 			<div class="flex items-center">
-				{#if message.authorRole === 'user'}
+				{#if message.role === 'user'}
 					<p
 						class="font-gill text-grey-100 pt-[0.07rem] pr-2 text-[0.68rem] tracking-[2px] uppercase antialiased"
 					>
@@ -223,7 +222,7 @@
 	</div>
 	<div class="relative box-border antialiased">
 		<div dir="auto" class="font-untitled tt-scroll-bar-h overflow-auto text-base">
-			{#if message.authorRole === 'assistant'}
+			{#if message.role === 'assistant'}
 				<div id="model-{message.id}" class="text-grey-300 tt-markdown">
 					{@html marked.parse(contents[contents.length - 1].text ?? '')}
 				</div>

@@ -14,8 +14,6 @@ import {
 import { relations } from 'drizzle-orm';
 import { now } from './helpers';
 
-// Tables
-
 export const users = pgTable('user', {
 	id: uuid().primaryKey().defaultRandom(),
 	firstName: text(),
@@ -23,6 +21,8 @@ export const users = pgTable('user', {
 	email: text().notNull().unique(),
 	passwordHash: text(),
 	avatarUrl: text(),
+	messageWindow: integer().default(5).notNull(),
+	tempChatDeleteHours: integer().default(24).notNull(),
 	createdAt: timestamp({ withTimezone: true, mode: 'date' }).notNull().defaultNow(),
 	updatedAt: timestamp({ withTimezone: true, mode: 'date' }).notNull().$onUpdate(now)
 });

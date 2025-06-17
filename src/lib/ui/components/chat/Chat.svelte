@@ -32,6 +32,10 @@
 	let chatContainer: HTMLDivElement;
 	let input = $state('');
 	let isChatOpen = $state(true);
+
+	// $effect(() => {
+	// 	console.log('chatUtilities.chat', chatUtilities.chat);
+	// });
 </script>
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->
@@ -53,7 +57,7 @@
 		{#if chatUtilities.chat}
 			<div class="tt-scroll-bar-v mt-[-1px] flex-1 overflow-auto" bind:this={chatContainer}>
 				{#each chatUtilities.messages as messageId, i (messageId)}
-					{#if chatUtilities.chat?.messages[messageId] !== undefined && chatUtilities.chat?.messages[messageId].authorRole !== 'system'}
+					{#if chatUtilities.chat?.messages[messageId] !== undefined && chatUtilities.chat?.messages[messageId].role !== 'system'}
 						<ChatMessage
 							{user}
 							message={chatUtilities.chat?.messages[messageId]}

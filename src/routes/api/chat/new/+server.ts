@@ -24,7 +24,7 @@ export const POST: RequestHandler = async ({ locals, request }) => {
 			.values({
 				id: rootMessageId,
 				chatId: chat.id,
-				authorRole: 'system'
+				role: 'system'
 			})
 			.returning();
 		await tx

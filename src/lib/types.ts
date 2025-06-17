@@ -62,7 +62,7 @@ export type Chat = {
 export type Message = {
 	id: string;
 	parentId: string | null;
-	authorRole: 'user' | 'assistant' | 'system';
+	role: 'user' | 'assistant' | 'system';
 	model: {
 		id: string;
 		name: string;

@@ -62,7 +62,7 @@ export const POST: RequestHandler = async ({ locals, request }) => {
 		? fileExtension
 		: mimeToExt[file.type];
 
-	const key = `${locals.user.id}/files/${id}${finalExtension}`;
+	const key = `users/${locals.user.id}/files/${id}${finalExtension}`;
 
 	const metadata = await sharp(Buffer.from(fileBuffer)).metadata();
 	const { width, height } = metadata;

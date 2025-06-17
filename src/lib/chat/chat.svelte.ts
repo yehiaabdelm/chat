@@ -178,9 +178,7 @@ export class Chat {
 	 * @param id The id of the message to navigate from
 	 */
 	editAndRegenerate = (id: string): void => {
-		const forward: string[] = this.walk(id, 'forward');
-		const backward: string[] = this.walk(id, 'backward');
-		this.#messages = backward.concat(forward.slice(1));
+		this.#messages = this.walk(id, 'backward').concat(this.walk(id, 'forward').slice(1));
 	};
 
 	/**
@@ -299,6 +297,29 @@ export class Chat {
 				invalidateAll();
 			}
 
+			const assistantMessageId = this.#generateId();
+
+			// this.#chat = {
+			// 	...this.#chat,
+			// 	messages: {
+			// 		[userMessageId]: {
+			// 			...this.#chat?.messages[userMessageId],
+			// 			children: [assistantMessageId]
+			// 		},
+			// 		[assistantMessageId]: {
+			// 			id: assistantMessageId,
+			// 			role: 'assistant',
+			// 			contents: [],
+			// 			children: [],
+			// 			model: get(selectedModel),
+			// 			createdAt: new Date(),
+			// 			updatedAt: new Date(),
+			// 			parentId: userMessageId
+			// 		}
+			// 	}
+			// };
+			// this.#messages = this.walk(assistantMessageId, 'backward');
+			// console.log(this.#messages);
 			// Step 4: Now send the actual message (for both new and existing chats)
 			// TODO: Implement actual message sending
 			// await this.sendMessage(userInput);
@@ -329,7 +350,7 @@ export class Chat {
 		const root: Message = {
 			id: rootMessageId,
 			createdAt: new Date(),
-			authorRole: 'system',
+			role: 'system',
 			contents: [],
 			parentId: null,
 			model: null,
@@ -337,11 +358,11 @@ export class Chat {
 			children: [userMessageId]
 		};
 
-		console.log(this.#getReadyAttachments());
+		// console.log(this.#getReadyAttachments());
 		const user: Message = {
 			id: userMessageId,
 			createdAt: new Date(),
-			authorRole: 'user',
+			role: 'user',
 			contents: [
 				...(text
 					? [{ id: this.#generateId(), type: 'text' as const, text: text, file: null }]
@@ -390,14 +411,12 @@ export class Chat {
 			// this.messages = messages;
 
 			await callChatApi({
-				api: this.#options.api ?? '/api/chat',
+				api: `/api/chat/${this.#chat?.id}`,
 				body: {
-					id: this.#chat?.id,
+					action: 'new',
 					messages,
 					modelId: get(selectedModel)?.id,
-					data: chatRequest.data,
-					...$state.snapshot(this.#options.body),
-					...chatRequest.body
+					assistantMessageId: null
 				},
 				streamProtocol: this.#streamProtocol,
 				abortController: () => abortController,

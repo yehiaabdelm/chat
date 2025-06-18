@@ -50,9 +50,10 @@
 	onmouseout={() => {
 		hovered = false;
 	}}
+	class="first:mt-1"
 >
 	<div
-		class="text-grey-450 flex items-center justify-center px-2 pt-[0.2rem] first:mt-1"
+		class="text-grey-450 flex items-center justify-center px-2"
 		style="opacity: {titleOpacity.current}"
 	>
 		<div class="pr-1">

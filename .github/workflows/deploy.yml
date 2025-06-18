@@ -99,6 +99,7 @@ jobs:
           Environment=AWS_S3_SECRET_ACCESS_KEY=${{ secrets.AWS_S3_SECRET_ACCESS_KEY }}
           Environment=AWS_REGION=${{ secrets.AWS_REGION }}
           Environment=OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
+          Environment=DATABASE_URL=${{ secrets.DATABASE_URL }}
           ExecStart=/opt/node /opt/app/build
           Restart=on-failure
           [Install]

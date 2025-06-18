@@ -104,6 +104,7 @@ jobs:
           Environment=GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
           Environment=GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
           Environment=SECRET_KEY=${{ secrets.SECRET_KEY }}
+          Environment=PUBLIC_STRIPE_DONATION_LINK=${{ secrets.PUBLIC_STRIPE_DONATION_LINK }}
           ExecStart=/opt/node /opt/app/build
           Restart=on-failure
           [Install]

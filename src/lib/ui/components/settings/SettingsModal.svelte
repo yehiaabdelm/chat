@@ -5,6 +5,7 @@
 	import ApiKeys from './ApiKeys.svelte';
 	import Model from '../chat/Model.svelte';
 	import type { User, Model as ModelType } from '$lib/types';
+	import { PUBLIC_STRIPE_DONATION_LINK } from '$env/static/public';
 	let {
 		user,
 		models,
@@ -144,7 +145,7 @@
 		<div class="flex w-full justify-between">
 			<a
 				class="font-gill text-grey-400 hover:text-grey-100 self-end text-[0.6rem] tracking-[2px] uppercase antialiased duration-200 ease-in-out"
-				href="/api/stripe/checkout/donate">donate</a
+				href={PUBLIC_STRIPE_DONATION_LINK}>donate</a
 			>
 			<div
 				class="*:font-gill flex flex-col *:text-[0.6rem] *:tracking-[2px] *:uppercase *:antialiased"

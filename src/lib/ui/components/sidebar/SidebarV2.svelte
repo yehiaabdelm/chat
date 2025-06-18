@@ -169,7 +169,7 @@
 		border-t-0 border-transparent duration-250"
 		style="background-color: rgb(var(--sidebar-color)); transition: background-color 1s ease;"
 	>
-		{#if saved}
+		{#if saved && chats.filter((chat) => chat.saved).length > 0}
 			<p
 				class="font-gill text-grey-400 sticky top-0 z-30 pt-3 pb-1 pl-3 text-[0.65rem] tracking-[2px] uppercase antialiased"
 				style="background-color: rgb(var(--sidebar-color)); transition: background-color 1s ease, box-shadow 1s ease;"

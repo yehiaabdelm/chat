@@ -73,7 +73,7 @@ export type Message = {
 	status: 'generated' | 'generating' | 'stopped' | 'error' | 'initialized';
 	createdAt: Date | null;
 	updatedAt: Date;
-	contents?: Array<{
+	contents: Array<{
 		id: string;
 		text: string | null;
 		type: 'file' | 'text';

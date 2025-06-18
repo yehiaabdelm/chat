@@ -9,9 +9,9 @@
 
 <!-- svelte-ignore a11y-mouse-events-have-key-events -->
 <!-- svelte-ignore a11y_consider_explicit_label -->
-<button {onclick} class="h-5">
+<button {onclick} class="h-5 cursor-pointer">
 	<svg
-		style="transform: translateX({$yPosition}px);"
+		style="transform: translateX({yPosition.current}px);"
 		class="h-[0.5em] w-[0.5em]"
 		viewBox="0 0 6 9"
 		version="1.1"

@@ -151,11 +151,42 @@ export class Chat {
 	 * @param id The id of the message to regenerate from
 	 */
 	regenerate = (id: string): void => {
-		// const messagesIds: string[] = this.walk(id, 'backward');
-		// const messages: Message[] = messagesIds.map(
-		// 	(messageId) => this.#chat?.messages[messageId] as Message
-		// );
-		// this.#triggerRequest({ messages });
+		const messagesIds: string[] = this.walk(id, 'backward');
+		const messages: Message[] = messagesIds.map(
+			(messageId) => this.#chat?.messages[messageId] as Message
+		);
+		if (messages[messages.length - 1].role !== 'user') {
+			return;
+		}
+		let assistantMessageId = this.#generateId();
+		this.#chat = {
+			...this.#chat!,
+			messages: {
+				...this.#chat!.messages,
+				[id]: {
+					...this.#chat!.messages[id],
+					children: [...this.#chat!.messages[id].children, assistantMessageId]
+				},
+				[assistantMessageId]: {
+					id: assistantMessageId,
+					role: 'assistant',
+					contents: [],
+					children: [],
+					status: 'generating',
+					model: get(selectedModel),
+					createdAt: new Date(),
+					updatedAt: new Date(),
+					parentId: id
+				}
+			}
+		};
+		this.#messages = this.walk(assistantMessageId, 'backward');
+		this.#triggerRequest(this.#chat!.id, {
+			action: 'regenerate',
+			messages: messages,
+			modelId: get(selectedModel)!.id,
+			assistantMessageId
+		});
 	};
 
 	/**
@@ -396,15 +427,9 @@ export class Chat {
 		this.#status = 'submitted';
 		this.#error = undefined;
 
-		const messages = chatRequest.messages;
-		const messageCount = messages.length;
-
 		try {
 			const abortController = new AbortController();
 			this.#abortController = abortController;
-
-			// Optimistically update messages
-			// this.messages = messages;
 
 			await callChatApi({
 				api: `/api/chat/${chatId}`,
@@ -467,18 +492,5 @@ export class Chat {
 			this.#status = 'error';
 			this.#error = coalescedError;
 		}
-
-		// auto-submit when all tool calls in the last assistant message have results
-		// and assistant has not answered yet
-		// if (
-		// 	shouldResubmitMessages({
-		// 		originalMaxToolInvocationStep: maxStep,
-		// 		originalMessageCount: messageCount,
-		// 		maxSteps: this.#maxSteps,
-		// 		messages: this.messages
-		// 	})
-		// ) {
-		// 	await this.#triggerRequest({ messages: this.messages });
-		// }
 	};
 }

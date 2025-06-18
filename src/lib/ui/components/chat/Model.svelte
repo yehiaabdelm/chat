@@ -5,7 +5,7 @@
 	import Anthropic from '$lib/ui/logos/Anthropic.svelte';
 	import type { Model as ModelType } from '$lib/types';
 
-	let { model, disabled }: { model: ModelType; disabled: boolean } = $props();
+	let { model, disabled = false }: { model: ModelType; disabled: boolean } = $props();
 
 	let modelOpacity = new Spring(0, { stiffness: 0.1, damping: 0.8 });
 

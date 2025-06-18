@@ -49,7 +49,7 @@
 					x: -50
 				}}
 			>
-				<Model {model} />
+				<Model {model} disabled={false} />
 			</div>
 		{/each}
 	</div>

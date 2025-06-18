@@ -170,7 +170,13 @@ export class Chat {
 				[assistantMessageId]: {
 					id: assistantMessageId,
 					role: 'assistant',
-					contents: [],
+					contents: [
+						{
+							type: 'text' as const,
+							text: '',
+							file: null
+						}
+					],
 					children: [],
 					status: 'generating',
 					model: get(selectedModel),
@@ -181,6 +187,7 @@ export class Chat {
 			}
 		};
 		this.#messages = this.walk(assistantMessageId, 'backward');
+		console.log('messages', this.#messages);
 		this.#triggerRequest(this.#chat!.id, {
 			action: 'regenerate',
 			messages: messages,

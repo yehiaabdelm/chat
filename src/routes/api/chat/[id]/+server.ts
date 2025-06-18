@@ -103,7 +103,7 @@ export const POST: RequestHandler = async ({ request, locals, params }) => {
 			});
 		},
 		onError: async (error) => {
-			console.error('AI streaming error:', error);
+			// console.error('AI streaming error:', error);
 			// console.error('AI streaming error:', error);
 		}
 	});

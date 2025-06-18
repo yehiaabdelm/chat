@@ -187,7 +187,6 @@ export class Chat {
 			}
 		};
 		this.#messages = this.walk(assistantMessageId, 'backward');
-		console.log('messages', this.#messages);
 		this.#triggerRequest(this.#chat!.id, {
 			action: 'regenerate',
 			messages: messages,
@@ -200,8 +199,51 @@ export class Chat {
 	 * Regenerate
 	 * @param id The id of the message to navigate from
 	 */
-	editAndRegenerate = (id: string): void => {
-		this.#messages = this.walk(id, 'backward').concat(this.walk(id, 'forward').slice(1));
+	editAndRegenerate = (id: string, parentId: string, editText: string): void => {
+		const newMessageId = this.#generateId();
+		const assistantMessageId = this.#generateId();
+		this.#chat = {
+			...this.#chat!,
+			messages: {
+				...this.#chat!.messages,
+				[parentId]: {
+					...this.#chat!.messages[parentId],
+					children: [...this.#chat!.messages[parentId].children, newMessageId]
+				},
+				[newMessageId]: {
+					id: newMessageId,
+					role: 'user',
+					contents: [
+						...this.#chat!.messages[id].contents.filter((content) => content.type === 'file'),
+						{ type: 'text' as const, text: editText, file: null }
+					],
+					children: [assistantMessageId],
+					status: 'initialized',
+					createdAt: new Date(),
+					updatedAt: new Date(),
+					parentId: parentId
+				},
+				[assistantMessageId]: {
+					id: assistantMessageId,
+					role: 'assistant',
+					contents: [{ type: 'text' as const, text: '', file: null }],
+					children: [],
+					status: 'generating',
+					model: get(selectedModel),
+					createdAt: new Date(),
+					updatedAt: new Date(),
+					parentId: newMessageId
+				}
+			}
+		};
+		const messagesIds: string[] = this.walk(assistantMessageId, 'backward');
+		this.#messages = messagesIds;
+		this.#triggerRequest(this.#chat!.id, {
+			action: 'new',
+			messages: this.#messages.map((messageId) => this.#chat!.messages[messageId]).slice(0, -1),
+			modelId: get(selectedModel)!.id,
+			assistantMessageId
+		});
 	};
 
 	/**

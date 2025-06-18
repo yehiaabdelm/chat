@@ -36,12 +36,12 @@
 		scrollToMessage?: boolean;
 		navigate: (id: string) => void;
 		regenerate: (id: string) => void;
-		editRegenerate: (id: string, text: string) => void;
+		editRegenerate: (id: string, parentId: string, editText: string) => void;
 		stop: () => void;
 	} = $props();
 
 	let messageElement: HTMLDivElement;
-	let editText = $state(message.contents?.map((content) => content.text)[0]);
+	let editText = $state(message.contents?.find((content) => content.type === 'text')?.text ?? '');
 
 	onMount(async () => {
 		messageY.set(0);
@@ -102,7 +102,7 @@
 			editMode = false;
 		}, 200);
 		transitioning = true;
-		editText = message.contents.map((content) => content.text)[0];
+		editText = message.contents.find((content) => content.type === 'text')?.text ?? '';
 	};
 </script>
 
@@ -137,7 +137,7 @@
 								<Submit
 									text="submit"
 									onclick={() => {
-										editRegenerate(message?.parentId ?? '', editText);
+										editRegenerate(message.id, message?.parentId, editText);
 									}}
 								/>
 								<Cancel

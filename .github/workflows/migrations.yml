@@ -17,16 +17,20 @@ jobs:
           npm install
           npm install -g drizzle-orm drizzle-kit pg
 
-      - name: Start SSH agent and add key
+      - name: Setup SSH key and known hosts
         run: |
-          eval "$(ssh-agent -s)"
-          ssh-add - <<< "${{ secrets.SSH_PRIVATE_KEY }}"
           mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -H ${{ secrets.SSH_HOST }} >> ~/.ssh/known_hosts
 
       - name: Start SSH tunnel to DB through EC2
         run: |
-          ssh -v -fN -L 5433:localhost:5432 ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}
+          echo "Starting SSH tunnel..."
+          ssh -v -fN -i ~/.ssh/id_ed25519 \
+            -o StrictHostKeyChecking=yes \
+            -L 5433:localhost:5432 \
+            ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}
 
       - name: Confirm tunnel works
         run: |
@@ -40,3 +44,6 @@ jobs:
         run: drizzle-kit migrate
         env:
           DATABASE_URL: postgres://${{ secrets.DATABASE_USER }}:${{ secrets.DATABASE_PASSWORD }}@localhost:5433/${{ secrets.DATABASE_NAME }}
+
+      - name: Clean up SSH key
+        run: rm -rf ~/.ssh

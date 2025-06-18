@@ -39,12 +39,9 @@
 		editRegenerate: (id: string, text: string) => void;
 		stop: () => void;
 	} = $props();
-
-	if (message.role === 'user') {
-		console.log(message.contents);
-	}
+	
 	let messageElement: HTMLDivElement;
-	let editText = $state(message.contents.map((content) => content.text)[0]);
+	let editText = $state(message.contents?.map((content) => content.text)[0]);
 
 	onMount(async () => {
 		messageY.set(0);
@@ -207,7 +204,7 @@
 		<div dir="auto" class="font-untitled tt-scroll-bar-h overflow-auto pb-2 text-base">
 			{#if message.role === 'assistant'}
 				<div id="model-{message.id}" class="text-grey-300 tt-markdown">
-					{@html marked.parse(message.contents[message.contents.length - 1].text ?? '')}
+					{@html marked.parse(message.contents?.[message.contents.length - 1].text ?? '')}
 				</div>
 			{:else}
 				{#each message.contents as content (content.id)}

@@ -76,7 +76,6 @@
 				</p>
 				<div class="flex flex-col">
 					<Link href="{PUBLIC_BASE_URL}/oauth?provider=google" provider="google" />
-					<Link href="{PUBLIC_BASE_URL}/oauth?provider=github" provider="github" />
 				</div>
 			</div>
 			<div class="text-grey-450 w-auto text-xs antialiased">

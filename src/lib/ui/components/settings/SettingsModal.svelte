@@ -5,9 +5,20 @@
 	import ApiKeys from './ApiKeys.svelte';
 	import Model from '../chat/Model.svelte';
 	import type { User, Model as ModelType } from '$lib/types';
-	let { user, models }: { user: User; models: ModelType[] } = $props();
+	let {
+		user,
+		models,
+		endpoints
+	}: {
+		user: User;
+		models: ModelType[];
+		endpoints: {
+			id: string;
+			name: string;
+			apiKey: boolean;
+		}[];
+	} = $props();
 
-	console.log(models);
 	let scale = new Spring(200, {
 		stiffness: 0.1,
 		damping: 0.8
@@ -41,13 +52,13 @@
 				/>
 				<div class="flex flex-col gap-0.5">
 					<h2
-						class="text-grey-100 font-untitled mt-[-2px] self-start text-right text-xl font-medium uppercase antialiased"
+						class="text-grey-100 font-untitled mt-[-2px] self-start text-right text-xl font-medium antialiased"
 					>
 						{user.firstName}
-						{user.lastName} Abdelmohsen
+						{user.lastName}
 					</h2>
 					{#if user.email}
-						<p class="text-grey-400 font-untitled ml-0.5 text-[0.6rem] uppercase antialiased">
+						<p class="text-grey-400 font-untitled ml-0.5 text-[0.6rem] antialiased">
 							{user.email}
 						</p>
 					{/if}
@@ -64,9 +75,9 @@
 									API Keys
 								</p>
 							</td>
-							<td class="w-2/3 p-2"> <ApiKeys /></td>
+							<td class="w-2/3 p-2"> <ApiKeys {endpoints} /> </td>
 						</tr>
-						<tr>
+						<!-- <tr>
 							<td class="w-1/3 p-2">
 								<div class="flex min-w-0 shrink flex-col self-start">
 									<p
@@ -86,19 +97,26 @@
 									<Model {model} onclick={() => {}} active={false} />
 								{/each}
 							</td>
-						</tr>
-						<!-- <tr>
+						</tr> -->
+						<tr>
 							<td class="w-1/3 p-2">
-								<div
-									class="font-gill text-grey-100 bg-transparent py-1 text-[0.7rem] tracking-[2px] uppercase antialiased"
-								>
-									time to delete
+								<div class="flex min-w-0 shrink flex-col self-start">
+									<p
+										class="font-gill text-grey-100 bg-transparent py-1 text-[0.7rem] tracking-[2px] uppercase antialiased"
+									>
+										time to delete
+									</p>
+									<p
+										class="font-untitled text-grey-425 bg-transparent py-1 text-[0.7rem] leading-4 antialiased"
+									>
+										Temporary chats will be deleted after this time.
+									</p>
 								</div>
 							</td>
 							<td class="w-2/3 p-2">
 								<TemporaryChats threshold={user.tempChatDeleteHours} />
 							</td>
-						</tr> -->
+						</tr>
 						<tr>
 							<td class="w-1/3 p-2">
 								<div class="flex min-w-0 shrink flex-col self-start">

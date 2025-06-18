@@ -104,7 +104,7 @@
 					style="background: linear-gradient(rgba(255,255,255,0.01), rgba(255,255,255,0.01)), linear-gradient(rgba(var(--theme-color), 1), rgba(var(--theme-color), 1));"
 				>
 					<form class="px-3 pt-1" onsubmit={chatUtilities.submit}>
-						{#if chat}
+						{#if chatUtilities.chat}
 							<BottomModelsPanel {models} />
 						{/if}
 						<div class="flex flex-wrap gap-2"></div>

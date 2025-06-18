@@ -257,7 +257,9 @@ export class Chat {
 			// chat exists so the parent is the last message
 			if (
 				originalMessages.length > 0 &&
-				originalChat?.messages[originalMessages[originalMessages.length - 1]].role === 'assistant'
+				(originalChat?.messages[originalMessages[originalMessages.length - 1]].role ===
+					'assistant' ||
+					originalChat?.messages[originalMessages[originalMessages.length - 1]].role === 'system')
 			) {
 				parentId = originalMessages[originalMessages.length - 1];
 			}
@@ -301,7 +303,6 @@ export class Chat {
 								: []),
 							...this.#getReadyAttachments().map((file) => ({
 								file,
-								...file,
 								text: null,
 								type: 'file' as const
 							}))
@@ -334,7 +335,7 @@ export class Chat {
 			// Step 4: Now send the actual message (for both new and existing chats)
 			const response = this.#triggerRequest(this.#chat!.id, {
 				action: 'new',
-				messages: [...this.#messages.map((message) => this.#chat!.messages[message])],
+				messages: [...this.#messages.map((message) => this.#chat!.messages[message])].slice(0, -1),
 				modelId: get(selectedModel)!.id,
 				assistantMessageId
 			});
@@ -454,6 +455,7 @@ export class Chat {
 			this.#status = 'ready';
 		} catch (error) {
 			if (isAbortError(error)) {
+				// Send a request to the server to save the message up until the last point
 				return;
 			}
 

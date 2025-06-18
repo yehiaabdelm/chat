@@ -69,7 +69,7 @@
 
 	// Interpolate the sun altitude based on the progress
 	let initialAltitude = sunAltitudeDefault - progress * (sunAltitudeDefault - 9.5);
-	const sunAltitude = new Spring(temporary ? initialAltitude : sunAltitudeDefault, {
+	const sunAltitude = new Spring(initialAltitude, {
 		stiffness: 0.1,
 		damping: 0.8
 	});
@@ -82,46 +82,46 @@
 		opacity.set(generationsRatio);
 		sunSize.set(sunSizeDefault);
 		temporary = false;
-		clearInterval(intervalId);
+		// clearInterval(intervalId);
 	}
 
-	const updateSun = () => {
-		progress = Math.min(getProgress(updatedAt), 1);
-		colorIndex = Math.min(Math.floor(progress * (sunsetColors.length - 1)), 3);
-		colorProgress = progress * (sunsetColors.length - 1) - colorIndex;
-		initialColor =
-			colorIndex === sunsetColors.length - 1
-				? sunsetColors[colorIndex]
-				: interpolateColor(sunsetColors[colorIndex], sunsetColors[colorIndex + 1], colorProgress);
+	// const updateSun = () => {
+	// 	progress = Math.min(getProgress(updatedAt), 1);
+	// 	colorIndex = Math.min(Math.floor(progress * (sunsetColors.length - 1)), 3);
+	// 	colorProgress = progress * (sunsetColors.length - 1) - colorIndex;
+	// 	initialColor =
+	// 		colorIndex === sunsetColors.length - 1
+	// 			? sunsetColors[colorIndex]
+	// 			: interpolateColor(sunsetColors[colorIndex], sunsetColors[colorIndex + 1], colorProgress);
 
-		red.set(initialColor.red);
-		green.set(initialColor.green);
-		blue.set(initialColor.blue);
+	// 	red.set(initialColor.red);
+	// 	green.set(initialColor.green);
+	// 	blue.set(initialColor.blue);
 
-		initialAltitude = sunAltitudeDefault - progress * (sunAltitudeDefault - 9.5);
-		sunAltitude.set(initialAltitude);
-	};
+	// 	initialAltitude = sunAltitudeDefault - progress * (sunAltitudeDefault - 9.5);
+	// 	sunAltitude.set(initialAltitude);
+	// };
 
-	const sunset = () => {
-		temporary = true;
-		opacity.set(1);
-		updateSun();
-		intervalId = setInterval(updateSun, 1000);
-	};
+	// const sunset = () => {
+	// 	temporary = true;
+	// 	opacity.set(1);
+	// 	updateSun();
+	// 	intervalId = setInterval(updateSun, 1000);
+	// };
 
-	onMount(() => {
-		if (temporary) {
-			sunset();
-		} else {
-			turnOff();
-		}
-		return () => {
-			clearInterval(intervalId);
-		};
-	});
+	// onMount(() => {
+	// 	if (temporary) {
+	// 		sunset();
+	// 	} else {
+	// 		turnOff();
+	// 	}
+	// 	return () => {
+	// 		clearInterval(intervalId);
+	// 	};
+	// });
 
 	function toggleSunsetMode() {
-		temporary ? turnOff() : sunset();
+		temporary ? turnOff() : () => {};
 	}
 
 	function pressDown() {

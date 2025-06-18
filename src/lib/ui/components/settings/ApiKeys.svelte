@@ -1,20 +1,21 @@
 <script lang="ts">
-	import { PUBLIC_BASE_URL } from '$env/static/public';
 	import OpenAI from '$lib/ui/logos/OpenAI.svelte';
 	import Anthropic from '$lib/ui/logos/Anthropic.svelte';
-	import { page } from '$app/state';
 	import { Spring } from 'svelte/motion';
-	import { invalidate, invalidateAll } from '$app/navigation';
+	import { invalidateAll } from '$app/navigation';
 
-	let providers = {
-		OpenAI: {
-			provider: 'openai',
-			key: '',
-			placeholder: 'sk-oHvZWhrvMi8GifAJ...'
-		},
-		Anthropic: { provider: 'anthropic', key: '', placeholder: 'sk-ant-api03-9y3irFHL...' }
-	};
+	let {
+		endpoints
+	}: {
+		endpoints: {
+			id: string;
+			name: string;
+			apiKey: boolean;
+		}[];
+	} = $props();
 
+	// Create local state for API keys
+	let apiKeys = $state<Record<string, string>>({});
 	let edited = $state(false);
 	let saving = $state(false);
 
@@ -31,13 +32,10 @@
 	// Define breathingInterval at the script level
 	let breathingInterval: ReturnType<typeof setInterval> | null = null;
 
-	function handleSave() {
+	async function handleSubmit(event: Event) {
+		event.preventDefault();
 		saving = true;
 		edited = false;
-
-		// Store the keys to clear them after submission
-		const openaiKey = providers.OpenAI.key;
-		const anthropicKey = providers.Anthropic.key;
 
 		// Clear any existing interval
 		if (breathingInterval) {
@@ -48,12 +46,30 @@
 		pulse();
 		breathingInterval = setInterval(pulse, 1000);
 
-		// Simulate API call (replace with actual form submission logic)
-		setTimeout(async () => {
-			// Clear the inputs after successful save
-			providers.OpenAI.key = '';
-			providers.Anthropic.key = '';
+		try {
+			// Submit all endpoints with API keys
+			const submissions = Object.entries(apiKeys)
+				.filter(([_, apiKey]) => apiKey.trim() !== '')
+				.map(async ([endpointId, apiKey]) => {
+					const formData = new FormData();
+					formData.append('endpointId', endpointId);
+					formData.append('apiKey', apiKey);
 
+					return fetch('?/userEndpoint', {
+						method: 'POST',
+						body: formData
+					});
+				});
+
+			await Promise.all(submissions);
+
+			// Clear the inputs after successful save
+			apiKeys = {};
+
+			await invalidateAll();
+		} catch (error) {
+			console.error('Error saving API keys:', error);
+		} finally {
 			// Stop the saving state
 			saving = false;
 
@@ -62,13 +78,18 @@
 				clearInterval(breathingInterval);
 				breathingInterval = null;
 			}
-			await invalidate('reload:user');
-		}, 3000);
+		}
 	}
 
 	// Function to track if any key has been edited
 	function updateEdited() {
-		edited = providers.OpenAI.key !== '' || providers.Anthropic.key !== '';
+		edited = Object.values(apiKeys).some((key) => key.trim() !== '');
+	}
+
+	// Update API key for specific endpoint
+	function updateApiKey(endpointId: string, value: string) {
+		apiKeys[endpointId] = value;
+		updateEdited();
 	}
 
 	const getLogo = (providerName: string) => {
@@ -81,35 +102,25 @@
 				return OpenAI;
 		}
 	};
-
-	// Check if API keys are initialized
-	let hasOpenAI = $derived(page.data.user?.api_keys?.openai || false);
-	let hasAnthropic = $derived(page.data.user?.api_keys?.anthropic || false);
 </script>
 
-<form
-	action="{PUBLIC_BASE_URL}/api/user"
-	target="dummyframe"
-	method="post"
-	class="flex items-center gap-3 max-sm:flex-col max-sm:items-start max-sm:gap-2"
-	onsubmit={handleSave}
->
+<div class="flex items-center gap-3 max-sm:flex-col max-sm:items-start max-sm:gap-2">
 	<div class="flex flex-col">
-		<div class="flex w-full gap-4">
-			{#each Object.entries(providers) as [provider, data]}
+		<form class="flex w-full gap-4" onsubmit={handleSubmit}>
+			{#each endpoints as endpoint}
 				<div class="flex items-center">
-					<svelte:component this={getLogo(data.provider)} />
+					{#if endpoint.name}
+						{@const Logo = getLogo(endpoint.name)}
+						<Logo />
+					{:else}
+						<OpenAI />
+					{/if}
 					<div class="relative flex-grow pb-1">
 						<input
 							type="password"
-							id="{provider.toLowerCase()}-key"
-							name="api_keys.{provider.toLowerCase()}"
-							bind:value={data.key}
-							oninput={updateEdited}
-							placeholder={(provider === 'OpenAI' && hasOpenAI) ||
-							(provider === 'Anthropic' && hasAnthropic)
-								? '••••••••••••••••••'
-								: data.placeholder}
+							value={apiKeys[endpoint.id] || ''}
+							oninput={(e) => updateApiKey(endpoint.id, e.currentTarget.value)}
+							placeholder={endpoint.apiKey ? '••••••••••••••••••' : 'Enter API key...'}
 							class="font-untitled text-grey-200 placeholder:text-grey-450 w-full rounded bg-transparent px-3 text-sm focus:outline-none"
 						/>
 					</div>
@@ -119,13 +130,13 @@
 				type="submit"
 				style="opacity: {breathe.current};"
 				disabled={saving || !edited}
-				class="font-untitled text-grey-100 bg-transparent text-sm antialiased transition-colors
+				class="font-untitled text-grey-100 cursor-pointer bg-transparent text-sm antialiased transition-colors
 				duration-500
 					{saving ? 'text-grey-100' : edited ? 'text-grey-100' : 'text-grey-450'}
 					hover:text-grey-100 disabled:hover:text-grey-450"
 			>
 				{saving ? 'Saving...' : 'Save'}
 			</button>
-		</div>
+		</form>
 	</div>
-</form>
+</div>

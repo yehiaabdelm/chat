@@ -9,6 +9,8 @@ import { streamText } from 'ai';
 import { transformMessage, writeMessage } from '$lib/server/chat';
 import type { CoreMessage } from 'ai';
 import type { ChatRequestBody } from '$lib/types';
+import { env } from '$env/dynamic/private';
+import * as crypto from '$lib/server/crypto';
 
 export const POST: RequestHandler = async ({ request, locals, params }) => {
 	if (!locals.user) {
@@ -62,17 +64,15 @@ export const POST: RequestHandler = async ({ request, locals, params }) => {
 	}
 
 	const endpointConfig = firstEndpoint.endpoint;
-	const apiKey = endpointConfig.userEndpoints[0].apiKey;
+	const apiKey = crypto.decrypt(endpointConfig.userEndpoints[0].apiKey, env.SECRET_KEY);
 	const modelName = firstEndpoint.endpointModelName;
 
-	// console.log(endpointConfig.name);
-	// console.log(JSON.stringify(messages, null, 2));
 	let aiClient;
-	if (endpointConfig.name === 'OpenAI') {
+	if (endpointConfig.name === 'openai') {
 		aiClient = createOpenAI({
 			apiKey: apiKey
 		});
-	} else if (endpointConfig.name === 'Anthropic') {
+	} else if (endpointConfig.name === 'anthropic') {
 		aiClient = createAnthropic({
 			apiKey: apiKey
 		});
@@ -81,7 +81,12 @@ export const POST: RequestHandler = async ({ request, locals, params }) => {
 	}
 
 	const coreMessages: CoreMessage[] = await Promise.all(
-		messages.map((message) => transformMessage(message, locals.user!.id))
+		messages
+			.filter((message) => {
+				// Filter out messages with no contents or only empty/whitespace text
+				return message.contents && message.contents.length > 0;
+			})
+			.map((message) => transformMessage(message, locals.user!.id))
 	);
 
 	const result = streamText({

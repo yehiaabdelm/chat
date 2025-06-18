@@ -1,25 +1,32 @@
 <script lang="ts">
 	let {
-		dialog = $bindable(),
-		onClickedDialog,
+		showModal = $bindable(),
 		children
 	}: {
-		dialog: HTMLDialogElement;
-		onClickedDialog: (e: MouseEvent) => void;
+		showModal: boolean;
 		children?: import('svelte').Snippet;
 	} = $props();
+
+	let dialog = $state(); // HTMLDialogElement
+
+	$effect(() => {
+		if (showModal) dialog?.showModal();
+	});
 </script>
 
 <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_noninteractive_element_interactions -->
 <dialog
 	bind:this={dialog}
 	class="no-scrollbar mx-auto my-auto w-fit rounded-xl border-none bg-[rgb(var(--settings-background-color))] font-sans"
-	onclick={onClickedDialog}
+	onclose={() => (showModal = false)}
+	onclick={(e) => {
+		if (e.target === dialog) {
+			dialog?.close();
+		}
+	}}
 >
 	<!-- svelte-ignore a11y_no_static_element_interactions -->
-	<div>
-		{@render children?.()}
-	</div>
+	{@render children?.()}
 </dialog>
 
 <style>

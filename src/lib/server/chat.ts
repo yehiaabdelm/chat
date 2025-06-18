@@ -2,7 +2,10 @@ import type { Message } from '$lib/types';
 import type { CoreMessage } from 'ai';
 import { db } from '$lib/server/db';
 import * as tables from '$lib/server/db/schema';
-import { generateSignature } from '$lib/server/s3';
+import { generateSignature, s3Client } from '$lib/server/s3';
+import { DeleteObjectCommand } from '@aws-sdk/client-s3';
+import { and, eq, inArray } from 'drizzle-orm';
+import { env } from '$env/dynamic/private';
 
 export const mapMessagesWithChildren = (
 	messages: Array<Omit<Message, 'children'>>
@@ -23,7 +26,7 @@ export const mapMessagesWithChildren = (
 
 export const transformMessage = async (message: Message, userId: string): Promise<CoreMessage> => {
 	const content = await Promise.all(
-		message.contents.map(async (part) => {
+		(message.contents || []).map(async (part) => {
 			if (part.type === 'text' && part.text) {
 				return {
 					type: 'text' as const,
@@ -31,7 +34,6 @@ export const transformMessage = async (message: Message, userId: string): Promis
 				};
 			} else if (part.type === 'file' && part.file?.id) {
 				// For now, only supporting images
-				console.log(part);
 				const extension = part.file.mimeType.split('/')[1];
 				return {
 					type: 'image' as const,
@@ -93,7 +95,7 @@ export const writeMessage = async ({
 				})
 				.returning();
 			await tx.insert(tables.contents).values(
-				userMessage?.contents.map((content) => ({
+				userMessage?.contents?.map((content) => ({
 					messageId: message.id,
 					type: content.type,
 					text: content.text,
@@ -116,4 +118,60 @@ export const writeMessage = async ({
 	} else {
 		throw new Error('Invalid action');
 	}
+};
+
+export const deleteChat = async (chatId: string, userId: string): Promise<void> => {
+	await deleteChatFiles(chatId, userId);
+	await db
+		.delete(tables.chats)
+		.where(and(eq(tables.chats.id, chatId), eq(tables.chats.userId, userId)));
+};
+
+export const deleteChats = async (chatIds: string[], userId: string): Promise<void> => {
+	if (chatIds.length === 0) return;
+
+	// Delete files for all chats
+	await Promise.all(chatIds.map((chatId) => deleteChatFiles(chatId, userId)));
+
+	// Delete all chats
+	await db
+		.delete(tables.chats)
+		.where(and(inArray(tables.chats.id, chatIds), eq(tables.chats.userId, userId)));
+};
+
+const deleteChatFiles = async (chatId: string, userId: string): Promise<void> => {
+	// Get all files associated with messages in this chat
+	const chatFiles = await db
+		.select({
+			id: tables.files.id,
+			key: tables.files.key
+		})
+		.from(tables.files)
+		.innerJoin(tables.contents, eq(tables.contents.fileId, tables.files.id))
+		.innerJoin(tables.messages, eq(tables.messages.id, tables.contents.messageId))
+		.where(and(eq(tables.messages.chatId, chatId), eq(tables.files.userId, userId)));
+
+	if (chatFiles.length === 0) return;
+
+	// Delete files from S3
+	const s3DeletePromises = chatFiles.map((file) =>
+		s3Client.send(
+			new DeleteObjectCommand({
+				Bucket: env.AWS_S3_BUCKET!,
+				Key: file.key
+			})
+		)
+	);
+
+	try {
+		await Promise.allSettled(s3DeletePromises);
+	} catch (error) {
+		console.error('Some S3 file deletions failed:', error);
+		// Continue with database deletion even if S3 fails
+	}
+
+	// Delete file records from database
+	// Note: The files will be automatically removed from contents table due to cascade delete
+	const fileIds = chatFiles.map((file) => file.id);
+	await db.delete(tables.files).where(inArray(tables.files.id, fileIds));
 };

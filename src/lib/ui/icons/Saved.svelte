@@ -4,8 +4,9 @@
 	let {
 		active = false,
 		text = 'saved chats',
-		onclick
-	}: { active: boolean; text: string; onclick?: () => void } = $props();
+		onclick,
+		type = 'button'
+	}: { active: boolean; text: string; onclick?: () => void; type?: 'button' | 'submit' } = $props();
 	let grey = 245;
 	let r = new Spring(grey, { stiffness: 0.1, damping: 0.8 });
 	let g = new Spring(grey, { stiffness: 0.1, damping: 0.8 });
@@ -28,7 +29,7 @@
 	});
 </script>
 
-<TextIcon children={icon} {text} {active} {onclick} />
+<TextIcon children={icon} {text} {active} {onclick} {type} />
 
 {#snippet icon()}
 	<svg

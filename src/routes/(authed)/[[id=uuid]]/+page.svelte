@@ -6,28 +6,20 @@
 	import NewChat from '$lib/ui/icons/NewChat.svelte';
 	import Modal from '$lib/ui/components/Modal.svelte';
 	import SettingsModal from '$lib/ui/components/settings/SettingsModal.svelte';
-	import { setSelectedModel } from '$lib/stores/model.svelte';
 
 	let { data }: { data: PageData } = $props();
-	setSelectedModel(data.models[0]);
+	selectedModel.set(data.models[0]);
 	let chats = $state(data.chats);
 
-	let dialog = $state<any>(null);
+	let showModal = $state(false);
 
 	$effect(() => {
 		chats = data.chats;
 	});
 </script>
 
-<Modal
-	bind:dialog
-	onClickedDialog={() => {
-		// if (dialog) {
-		// 	dialog.close();
-		// }
-	}}
->
-	<SettingsModal user={data.user} models={data.models} />
+<Modal bind:showModal>
+	<SettingsModal user={data.user} models={data.models} endpoints={data.endpoints} />
 </Modal>
 
 <div class="relative flex h-dvh w-screen flex-col overflow-hidden">
@@ -40,8 +32,9 @@
 	<div class="flex h-full flex-col max-md:pt-8 lg:flex-row">
 		<SidebarV2
 			bind:chats
+			user={data.user}
 			onclickSettings={() => {
-				dialog.showModal();
+				showModal = true;
 			}}
 		/>
 		{#key data.chat}

@@ -1,34 +1,33 @@
 <script lang="ts">
-	import { fade, slide } from 'svelte/transition';
-	import Model from './Model.svelte';
+	import type { Model } from '$lib/types';
+	let { models }: { models: Model[] } = $props();
+	import ModelComponent from './Model.svelte';
 	import { Spring } from 'svelte/motion';
-	import type { Model as ModelType } from '$lib/types';
-	import { selectedModel } from '$lib/stores/model';
 
-	let { models }: { models: ModelType[] } = $props();
+	const initialOpacity = 0;
+	const opacity = new Spring(initialOpacity, { stiffness: 0.1, damping: 0.8 });
 
-	let opacity = new Spring(0, { stiffness: 0.1, damping: 0.8 });
-
-	$effect(() => {
+	setTimeout(() => {
 		opacity.set(1);
-	});
+	}, 400);
 </script>
 
-<div class="flex flex-col gap-y-4" style="opacity: {opacity.current}">
-	<p
-		class="font-gill text-grey-300 text-left text-[0.7rem] tracking-[3px] uppercase antialiased md:text-center"
-	>
-		Select a model
-	</p>
-	<div class="text-grey-150 grid grid-rows-2 lg:grid-flow-col" style="grid-column-gap: 3rem;">
-		{#each models as model, i (model.id)}
-			<Model
-				{model}
-				active={model.id === $selectedModel?.id}
-				onclick={() => {
-					selectedModel.set(model);
-				}}
-			/>
-		{/each}
-	</div>
+<div class="flex flex-col items-center gap-y-4" style="opacity: {opacity.current}">
+	{#if models.length === 0}
+		<div class="flex flex-col items-center gap-y-3 text-center">
+			<p class="font-gill text-grey-300 text-[0.7rem] tracking-[3px] uppercase">
+				No models available
+			</p>
+			<p class="font-untitled text-grey-400 max-w-sm text-sm">
+				Add an API key in settings to start using Teletyped
+			</p>
+		</div>
+	{:else}
+		<p class="font-gill text-grey-300 text-[0.7rem] tracking-[3px] uppercase">Select a model</p>
+		<div class="text-grey-150 grid grid-rows-2 lg:grid-flow-col" style="grid-column-gap: 3rem;">
+			{#each models as model, i}
+				<ModelComponent {model} disabled={false} />
+			{/each}
+		</div>
+	{/if}
 </div>

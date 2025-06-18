@@ -6,6 +6,7 @@ export type User = {
 	avatarUrl: string | null;
 	tempChatDeleteHours: number;
 	messageWindow: number;
+	pinnedChats: boolean;
 };
 
 export type UnattachedFile = {

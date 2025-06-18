@@ -2,10 +2,12 @@ import type { PageServerLoad } from './$types';
 import { db } from '$lib/server/db';
 import { and, eq, isNull } from 'drizzle-orm';
 import * as tables from '$lib/server/db/schema';
-import { redirect } from '@sveltejs/kit';
+import { redirect, type Actions } from '@sveltejs/kit';
 import { mapMessagesWithChildren } from '$lib/server/chat';
 import { generateSignature } from '$lib/server/s3';
 import type { FileWithUrl } from '$lib/types';
+import { env } from '$env/dynamic/private';
+import * as crypto from '$lib/server/crypto';
 
 export const load = (async ({ params, locals }) => {
 	if (!locals.user) {
@@ -78,7 +80,6 @@ export const load = (async ({ params, locals }) => {
 			redirect(302, '/');
 		}
 
-		console.log(JSON.stringify(chat.messages, null, 2));
 		await Promise.all(
 			chat.messages.map((msg) =>
 				Promise.all(
@@ -103,3 +104,63 @@ export const load = (async ({ params, locals }) => {
 		unattachedFiles
 	};
 }) satisfies PageServerLoad;
+
+export const actions: Actions = {
+	pinned: async ({ locals, request }) => {
+		const form = await request.formData();
+		const pinned = form.get('pinned') === 'true';
+		if (!locals.user) {
+			return { error: 'User not found' };
+		}
+		await db
+			.update(tables.users)
+			.set({ pinnedChats: pinned })
+			.where(eq(tables.users.id, locals.user.id));
+		return { success: true };
+	},
+	userEndpoint: async ({ locals, request }) => {
+		const form = await request.formData();
+		const endpointId = form.get('endpointId');
+		const apiKey = form.get('apiKey');
+		const encryptedApiKey = crypto.encrypt(apiKey as string, env.SECRET_KEY);
+		if (!locals.user) {
+			return { error: 'User not found' };
+		}
+		await db
+			.insert(tables.userEndpoint)
+			.values({
+				userId: locals.user.id,
+				endpointId: endpointId as string,
+				apiKey: encryptedApiKey
+			})
+			.onConflictDoUpdate({
+				target: [tables.userEndpoint.userId, tables.userEndpoint.endpointId],
+				set: {
+					apiKey: encryptedApiKey,
+					updatedAt: new Date()
+				}
+			});
+		return { success: true };
+	},
+	timeToDelete: async ({ locals, request }) => {
+		const form = Object.fromEntries(await request.formData());
+		const timeToDelete = parseInt(form.timeToDelete as string);
+		if (!locals.user) {
+			return { error: 'User not found' };
+		}
+		await db
+			.update(tables.users)
+			.set({ tempChatDeleteHours: timeToDelete })
+			.where(eq(tables.users.id, locals.user.id));
+		return { success: true };
+	},
+	messageWindow: async ({ locals, request }) => {
+		const form = Object.fromEntries(await request.formData());
+		const messageWindow = parseInt(form.messageWindow as string);
+		if (!locals.user) {
+			return { error: 'User not found' };
+		}
+		await db.update(tables.users).set({ messageWindow }).where(eq(tables.users.id, locals.user.id));
+		return { success: true };
+	}
+};

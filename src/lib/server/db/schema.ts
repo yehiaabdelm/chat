@@ -23,6 +23,7 @@ export const users = pgTable('user', {
 	avatarUrl: text(),
 	messageWindow: integer().default(5).notNull(),
 	tempChatDeleteHours: integer().default(24).notNull(),
+	pinnedChats: boolean().default(false).notNull(),
 	createdAt: timestamp({ withTimezone: true, mode: 'date' }).notNull().defaultNow(),
 	updatedAt: timestamp({ withTimezone: true, mode: 'date' }).notNull().$onUpdate(now)
 });

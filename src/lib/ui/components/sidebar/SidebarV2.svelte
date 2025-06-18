@@ -8,15 +8,17 @@
 	import ColorWheel from './ColorWheel.svelte';
 	import { page } from '$app/state';
 	import { Spring } from 'svelte/motion';
-	import type { ChatTitle } from '$lib/types';
+	import type { ChatTitle, User } from '$lib/types';
+	import { enhance } from '$app/forms';
 
 	let {
 		chats = $bindable(),
-		onclickSettings
-	}: { chats: ChatTitle[]; onclickSettings: () => void } = $props();
+		onclickSettings,
+		user
+	}: { chats: ChatTitle[]; onclickSettings: () => void; user: User } = $props();
 
 	let maximumGenerations = $derived(Math.max(...chats.map((chat) => chat.generations ?? 0)));
-	let saved = $state(false);
+	let saved = $state(user.pinnedChats);
 	let searchDisabled = $state(true);
 
 	let colorWheelY = new Spring(100, { damping: 0.8, stiffness: 0.1 });
@@ -114,13 +116,17 @@
 		style="opacity: {buttonsOpacity.current};"
 	>
 		<NewChat text="new chat" href="/" active={page.url.pathname !== '/'} />
-		<Saved
-			text="saved chats"
-			active={saved}
-			onclick={() => {
-				saved = !saved;
-			}}
-		/>
+		<form action="?/pinned" method="POST" use:enhance>
+			<input type="hidden" name="pinned" value={saved ? 'true' : 'false'} />
+			<Saved
+				text="pinned chats"
+				type="submit"
+				active={saved}
+				onclick={() => {
+					saved = !saved;
+				}}
+			/>
+		</form>
 		<Expand text="model settings" active={false} />
 		<Settings onclick={onclickSettings} />
 	</div>
@@ -163,20 +169,31 @@
 		border-t-0 border-transparent duration-250"
 		style="background-color: rgb(var(--sidebar-color)); transition: background-color 1s ease;"
 	>
+		{#if saved}
+			<p
+				class="font-gill text-grey-400 sticky top-0 z-30 pt-3 pb-1 pl-3 text-[0.65rem] tracking-[2px] uppercase antialiased"
+				style="background-color: rgb(var(--sidebar-color)); transition: background-color 1s ease, box-shadow 1s ease;"
+			>
+				Pinned chats
+			</p>
+			{#each chats.filter((chat) => chat.saved) as chat}
+				<Title {chat} {maximumGenerations} hovered={false} {updateChat} />
+			{/each}
+		{/if}
 		{#if chats.length > 0}
 			{#each categorizedTitles as [category, categoryTitles]}
 				<div class="border-b-grey-1100 border-b pt-2 pb-3" style="opacity: {titlesOpacity.current}">
 					<p
 						class="font-gill text-grey-400 sticky top-0 z-30 pt-3 pb-1 pl-3 text-[0.65rem] tracking-[2px] uppercase antialiased"
-						style="background-color: var(--sidebar-color); transition: background-color 1s ease, box-shadow 1s ease;"
+						style="background-color: rgb(var(--sidebar-color)); transition: background-color 1s ease, box-shadow 1s ease;"
 					>
 						{category}
 					</p>
 					<div>
 						{#each categoryTitles as chat (chat.id)}
-							<div>
+							{#if (saved && !chat.saved) || !saved}
 								<Title {chat} {maximumGenerations} hovered={false} {updateChat} />
-							</div>
+							{/if}
 						{/each}
 					</div>
 				</div>

@@ -57,7 +57,7 @@
 	>
 		<div class="pr-1">
 			<TemporaryChatButton
-				generationsRatio={chat.generations ?? 0 / maximumGenerations}
+				generationsRatio={normalizedGeneration}
 				onclick={() => updateChat(chat.id, 'temporary', !chat.deleteAfter)}
 				{sunOpacity}
 				updatedAtString={lastUpdated}

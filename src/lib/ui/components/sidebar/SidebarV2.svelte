@@ -200,7 +200,7 @@
 			{/each}
 		{:else}
 			<p
-				class="text-grey-500 font-gill m-auto items-center justify-center text-[0.7rem] tracking-[2px] uppercase antialiased"
+				class="text-grey-500 font-gill absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center text-[0.7rem] tracking-[2px] uppercase antialiased"
 			>
 				No chats yet
 			</p>

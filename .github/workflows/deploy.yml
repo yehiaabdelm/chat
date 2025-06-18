@@ -26,6 +26,8 @@ jobs:
         run: cd app && npm run build
         env:
           PUBLIC_BASE_URL: ${{ secrets.PUBLIC_BASE_URL }}
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
 
       - name: Create container file structure
         run: |

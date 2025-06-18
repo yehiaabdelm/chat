@@ -111,7 +111,7 @@
 						<textarea
 							bind:value={chatUtilities.input}
 							bind:offsetHeight={textAreaHeight}
-							class="text-grey-200 font-untitled placeholder:font-untitled placeholder:text-grey-450 tt-scroll-bar-v
+							class="text-grey-200 font-public placeholder:font-public placeholder:text-grey-450 tt-scroll-bar-v
 							my-auto field-sizing-content max-h-[35rem] w-full resize-none bg-transparent py-3 antialiased outline-none
 							placeholder:antialiased sm:text-base"
 							style="transition: background-color 1s ease;"

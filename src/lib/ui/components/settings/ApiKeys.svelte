@@ -121,7 +121,7 @@
 							value={apiKeys[endpoint.id] || ''}
 							oninput={(e) => updateApiKey(endpoint.id, e.currentTarget.value)}
 							placeholder={endpoint.apiKey ? '••••••••••••••••••' : 'Enter API key...'}
-							class="font-untitled text-grey-200 placeholder:text-grey-450 w-full rounded bg-transparent px-3 text-sm focus:outline-none"
+							class="font-public text-grey-200 placeholder:text-grey-450 w-full rounded bg-transparent px-3 text-sm focus:outline-none"
 						/>
 					</div>
 				</div>
@@ -130,7 +130,7 @@
 				type="submit"
 				style="opacity: {breathe.current};"
 				disabled={saving || !edited}
-				class="font-untitled text-grey-100 cursor-pointer bg-transparent text-sm antialiased transition-colors
+				class="font-public text-grey-100 cursor-pointer bg-transparent text-sm antialiased transition-colors
 				duration-500
 					{saving ? 'text-grey-100' : edited ? 'text-grey-100' : 'text-grey-450'}
 					hover:text-grey-100 disabled:hover:text-grey-450"

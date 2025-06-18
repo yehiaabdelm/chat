@@ -11,7 +11,7 @@
 				<input type="hidden" name="timeToDelete" value={period} />
 				<button
 					type="submit"
-					class="font-untitled hover:text-grey-100 cursor-pointer bg-transparent text-sm antialiased transition-colors duration-500 {threshold ===
+					class="font-public hover:text-grey-100 cursor-pointer bg-transparent text-sm antialiased transition-colors duration-500 {threshold ===
 					period
 						? 'text-grey-100'
 						: 'text-grey-450'}"

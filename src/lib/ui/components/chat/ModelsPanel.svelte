@@ -18,7 +18,7 @@
 			<p class="font-gill text-grey-300 text-[0.7rem] tracking-[3px] uppercase">
 				No models available
 			</p>
-			<p class="font-untitled text-grey-400 max-w-sm text-sm">
+			<p class="font-public text-grey-400 max-w-sm text-sm">
 				Add an API key in settings to start using Teletyped
 			</p>
 		</div>

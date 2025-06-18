@@ -55,7 +55,7 @@
 					Drop photos
 				</p>
 			</div>
-			<p class="font-untitled text-grey-500 text-xs tracking-[1.5px] uppercase antialiased">
+			<p class="font-public text-grey-500 text-xs tracking-[1.5px] uppercase antialiased">
 				Max 10 photos per chat at 20mb each
 			</p>
 		</div>

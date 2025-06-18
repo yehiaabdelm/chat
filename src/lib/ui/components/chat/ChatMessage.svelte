@@ -201,7 +201,7 @@
 		</div>
 	</div>
 	<div class="relative box-border antialiased">
-		<div dir="auto" class="font-untitled tt-scroll-bar-h overflow-auto text-base">
+		<div dir="auto" class="font-public tt-scroll-bar-h overflow-auto text-base">
 			{#if message.role === 'assistant'}
 				<div id="model-{message.id}" class="text-grey-300 tt-markdown">
 					{@html marked.parse(message.contents?.[message.contents.length - 1].text ?? '')}

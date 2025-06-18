@@ -53,13 +53,13 @@
 				/>
 				<div class="flex flex-col gap-0.5">
 					<h2
-						class="text-grey-100 font-untitled mt-[-2px] self-start text-right text-xl font-medium antialiased"
+						class="text-grey-100 font-public mt-[-2px] self-start text-right text-xl font-medium antialiased"
 					>
 						{user.firstName}
 						{user.lastName}
 					</h2>
 					{#if user.email}
-						<p class="text-grey-400 font-untitled ml-0.5 text-[0.6rem] antialiased">
+						<p class="text-grey-400 font-public ml-0.5 text-[0.75rem] antialiased">
 							{user.email}
 						</p>
 					{/if}
@@ -87,7 +87,7 @@
 										Models
 									</p>
 									<p
-										class="font-untitled text-grey-425 bg-transparent py-1 text-[0.7rem] leading-4 antialiased"
+										class="font-public text-grey-425 bg-transparent py-1 text-[0.7rem] leading-4 antialiased"
 									>
 										Select the models you want to use.
 									</p>
@@ -108,7 +108,7 @@
 										time to delete
 									</p>
 									<p
-										class="font-untitled text-grey-425 bg-transparent py-1 text-[0.7rem] leading-4 antialiased"
+										class="font-public text-grey-425 bg-transparent py-1 text-[0.7rem] leading-4 antialiased"
 									>
 										Temporary chats will be deleted after this time.
 									</p>
@@ -127,7 +127,7 @@
 										message window limit
 									</p>
 									<p
-										class="font-untitled text-grey-425 bg-transparent py-1 text-[0.7rem] leading-4 antialiased"
+										class="font-public text-grey-425 bg-transparent py-1 text-[0.7rem] leading-4 antialiased"
 									>
 										Reduce model usage costs by limiting its window to the most recent 10 messages.
 										Default: 10

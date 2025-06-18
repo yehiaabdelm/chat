@@ -163,6 +163,13 @@ jobs:
               rm "${images[$i]}"
             done
           fi
+
+          echo "🔧 Running migrations inside attached image..."
+          export DATABASE_URL="${DATABASE_URL}"
+          sudo systemd-run --wait --pipe --unit=migrate-${name} -p DynamicUser=no -p ExecStart=/opt/node \
+          /opt/app/node_modules/.bin/drizzle-kit migrate
+          echo "🔧 Migrations completed"
+          
           BASH
       - name: Delete .ssh directory
         run: rm -rf ~/.ssh

@@ -143,11 +143,11 @@
 		</div>
 		<div class="flex w-full justify-between">
 			<a
-				class="font-gill text-grey-400 hover:text-grey-100 self-end text-[0.7rem] tracking-[2px] uppercase antialiased duration-200 ease-in-out"
+				class="font-gill text-grey-400 hover:text-grey-100 self-end text-[0.6rem] tracking-[2px] uppercase antialiased duration-200 ease-in-out"
 				href="/api/stripe/checkout/donate">donate</a
 			>
 			<div
-				class="*:font-gill flex flex-col *:text-[0.7rem] *:tracking-[2px] *:uppercase *:antialiased"
+				class="*:font-gill flex flex-col *:text-[0.6rem] *:tracking-[2px] *:uppercase *:antialiased"
 			>
 				<p class="text-grey-400 self-end">contact us</p>
 				<p class="text-grey-600">support@teletyped.com</p>

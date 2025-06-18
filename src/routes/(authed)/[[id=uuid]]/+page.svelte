@@ -18,6 +18,10 @@
 	});
 </script>
 
+<svelte:head>
+	<title>{`${data?.chat?.title ?? 'New Chat'}`}</title>
+</svelte:head>
+
 <Modal bind:showModal>
 	<SettingsModal user={data.user} models={data.models} endpoints={data.endpoints} />
 </Modal>

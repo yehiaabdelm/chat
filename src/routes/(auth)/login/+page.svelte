@@ -35,6 +35,10 @@
 	}, 500);
 </script>
 
+<svelte:head>
+	<title>Teletyped | Login</title>
+</svelte:head>
+
 <div class="mx-auto flex max-w-5xl flex-col gap-72 pt-3 pr-4 pl-4 antialiased">
 	<button
 		onmouseenter={() => {

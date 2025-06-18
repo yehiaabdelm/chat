@@ -10,7 +10,10 @@
 	import { Spring } from 'svelte/motion';
 	import type { ChatTitle } from '$lib/types';
 
-	let { chats = $bindable() }: { chats: ChatTitle[] } = $props();
+	let {
+		chats = $bindable(),
+		onclickSettings
+	}: { chats: ChatTitle[]; onclickSettings: () => void } = $props();
 
 	let maximumGenerations = $derived(Math.max(...chats.map((chat) => chat.generations ?? 0)));
 	let saved = $state(false);
@@ -119,7 +122,7 @@
 			}}
 		/>
 		<Expand text="model settings" active={false} />
-		<Settings />
+		<Settings onclick={onclickSettings} />
 	</div>
 	<div
 		class="border-grey-1100 flex items-center rounded-tl-xl
@@ -152,12 +155,12 @@
 		/>
 	</div>
 	<div
-		class="relative
+		class="no-scrollbar
+        relative
         h-full
-        overflow-x-hidden
-		overflow-y-auto rounded-br-xl
-		rounded-bl-xl border border-t-0
-		border-transparent duration-250"
+		overflow-x-hidden overflow-y-auto
+		rounded-br-xl rounded-bl-xl border
+		border-t-0 border-transparent duration-250"
 		style="background-color: rgb(var(--sidebar-color)); transition: background-color 1s ease;"
 	>
 		{#if chats.length > 0}

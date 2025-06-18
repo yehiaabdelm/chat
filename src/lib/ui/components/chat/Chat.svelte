@@ -17,6 +17,7 @@
 	}: { models: Model[]; chat?: ChatType; unattachedFiles: FileWithUrl[]; user: User } = $props();
 
 	let isDragging = $state(false);
+	let textAreaHeight = $state(0);
 	let errorMessage = $state('');
 	let chatUtilities = new ChatV2({
 		initialChat: chat,
@@ -55,7 +56,11 @@
 >
 	<div class="no-scrollbar relative flex w-full flex-col overflow-scroll md:w-[43rem]">
 		{#if chatUtilities.chat}
-			<div class="tt-scroll-bar-v mt-[-1px] flex-1 overflow-auto" bind:this={chatContainer}>
+			<div
+				class="tt-scroll-bar-v no-scrollbar mt-[-1px] flex-1 overflow-auto"
+				style="padding-bottom: {textAreaHeight ? textAreaHeight + 56 : 104}px; "
+				bind:this={chatContainer}
+			>
 				{#each chatUtilities.messages as messageId, i (messageId)}
 					{#if chatUtilities.chat?.messages[messageId] !== undefined && chatUtilities.chat?.messages[messageId].role !== 'system'}
 						<ChatMessage
@@ -71,13 +76,6 @@
 							editRegenerate={chatUtilities.editAndRegenerate}
 							stop={chatUtilities.stop}
 							last={i === chatUtilities.messages.length - 1}
-							status={chatUtilities.status as
-								| 'generated'
-								| 'generating'
-								| 'stopped'
-								| 'error'
-								| 'initialized'
-								| 'user_edited'}
 						/>
 					{/if}
 				{/each}
@@ -112,6 +110,7 @@
 						<div class="flex flex-wrap gap-2"></div>
 						<textarea
 							bind:value={chatUtilities.input}
+							bind:offsetHeight={textAreaHeight}
 							class="text-grey-200 font-untitled placeholder:font-untitled placeholder:text-grey-450 tt-scroll-bar-v
 							my-auto field-sizing-content max-h-[35rem] w-full resize-none bg-transparent py-3 antialiased outline-none
 							placeholder:antialiased sm:text-base"

@@ -13,11 +13,11 @@ export const DEFAULT_ENDPOINTS: Endpoint[] = [
 			// 	endpointName: 'OpenAI'
 			// },
 			{
-				name: 'o3',
+				name: 'gpt 4o mini',
 				vendor: 'openai',
 				description: `The most powerful reasoning model by OpenAI.`,
 				modalities: ['text', 'image'],
-				apiModelName: 'o3'
+				apiModelName: 'gpt-4o-mini'
 			},
 			{
 				name: 'gpt 4o',

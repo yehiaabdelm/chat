@@ -15,13 +15,13 @@
 	import { tick } from 'svelte';
 	import { messageBorders } from '$lib/stores/ui';
 	import type { FileWithUrl, Message, User } from '$lib/types';
+
 	let {
 		message,
 		siblings,
 		last,
 		loading,
 		user,
-		status,
 		scrollToMessage = false,
 		navigate,
 		regenerate,
@@ -33,14 +33,6 @@
 		last: boolean;
 		loading: boolean;
 		user: User;
-		status:
-			| 'generated'
-			| 'generating'
-			| 'stopped'
-			| 'error'
-			| 'initialized'
-			| 'user_edited'
-			| undefined;
 		scrollToMessage?: boolean;
 		navigate: (id: string) => void;
 		regenerate: (id: string) => void;
@@ -48,20 +40,11 @@
 		stop: () => void;
 	} = $props();
 
-	let contents: {
-		id: string;
-		text: string | null;
-		type: 'file' | 'text';
-		file: never | FileWithUrl | null;
-	}[] = $state(
-		message.contents.sort((a, b) => {
-			if (a.type === 'file' && b.type === 'text') return -1;
-			if (a.type === 'text' && b.type === 'file') return 1;
-			return 0;
-		})
-	);
+	if (message.role === 'user') {
+		console.log(message.contents);
+	}
 	let messageElement: HTMLDivElement;
-	let editText = $state(contents[contents.length - 1]?.text ?? '');
+	let editText = $state(message.contents.map((content) => content.text)[0]);
 
 	onMount(async () => {
 		messageY.set(0);
@@ -122,7 +105,7 @@
 			editMode = false;
 		}, 200);
 		transitioning = true;
-		editText = contents[contents.length - 1]?.text ?? '';
+		editText = message.contents.map((content) => content.text)[0];
 	};
 </script>
 
@@ -187,7 +170,7 @@
 						{message.model?.name}
 					</p>
 					<div class="flex h-3 gap-1">
-						{#if status === 'generating'}
+						{#if message.status === 'generating'}
 							<Stop onclick={stop} />
 						{:else}
 							<div
@@ -221,33 +204,33 @@
 		</div>
 	</div>
 	<div class="relative box-border antialiased">
-		<div dir="auto" class="font-untitled tt-scroll-bar-h overflow-auto text-base">
+		<div dir="auto" class="font-untitled tt-scroll-bar-h overflow-auto pb-2 text-base">
 			{#if message.role === 'assistant'}
 				<div id="model-{message.id}" class="text-grey-300 tt-markdown">
-					{@html marked.parse(contents[contents.length - 1].text ?? '')}
+					{@html marked.parse(message.contents[message.contents.length - 1].text ?? '')}
 				</div>
 			{:else}
-				{@const imageContents = contents.filter((content) => content.type === 'file')}
-				{#if imageContents.length > 0}
-					<div class="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-						{#each imageContents as content (content.id)}
+				{#each message.contents as content (content.id)}
+					{#if content.type === 'file'}
+						<div class="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
 							<div class="bg-grey-600 aspect-video overflow-hidden rounded-xl">
 								<Image src={content.file?.url ?? ''} alt={''} />
 							</div>
-						{/each}
-					</div>
-				{/if}
-				{@const textContents = contents.filter((content) => content.type === 'text')}
-				{#each textContents as content (content.id)}
-					<div class="text-grey-300 overflow-auto pb-3 break-words" style="white-space: pre-wrap;">
-						<textarea
-							in:fade
-							class="focus-ring-0 h-auto w-full resize-none border-none bg-transparent outline-none"
-							bind:value={editText}
-							readonly={!editMode}
-							rows="1"
-						></textarea>
-					</div>
+						</div>
+					{/if}
+				{/each}
+				{#each message.contents as content (content.id)}
+					{#if content.type === 'text'}
+						<div class="text-grey-300 overflow-auto break-words" style="white-space: pre-wrap;">
+							<textarea
+								in:fade
+								class="focus-ring-0 field-sizing-content h-auto w-full resize-none border-none bg-transparent outline-none"
+								bind:value={editText}
+								readonly={!editMode}
+								rows="1"
+							></textarea>
+						</div>
+					{/if}
 				{/each}
 			{/if}
 		</div>

@@ -113,7 +113,7 @@
 		</g>
 	</svg>
 	<p
-		class="font-gill text-grey-300 text-[0.63rem] tracking-wide uppercase antialiased"
+		class="font-gill text-grey-300 text-[0.63rem] tracking-[3px] uppercase antialiased"
 		style="opacity: {opacity.current};"
 	>
 		regenerate

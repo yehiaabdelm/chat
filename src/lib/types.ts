@@ -4,6 +4,8 @@ export type User = {
 	firstName: string | null;
 	lastName: string | null;
 	avatarUrl: string | null;
+	tempChatDeleteHours: number;
+	messageWindow: number;
 };
 
 export type UnattachedFile = {
@@ -67,9 +69,10 @@ export type Message = {
 		id: string;
 		name: string;
 	} | null;
+	status: 'generated' | 'generating' | 'stopped' | 'error' | 'initialized';
 	createdAt: Date | null;
 	updatedAt: Date;
-	contents: Array<{
+	contents?: Array<{
 		id: string;
 		text: string | null;
 		type: 'file' | 'text';
@@ -89,4 +92,11 @@ export type ChatTitle = {
 	saved: boolean | null;
 	generations: number | null;
 	deleteAfter: Date | null;
+};
+
+export type ChatRequestBody = {
+	modelId: string;
+	action: 'new' | 'regenerate';
+	messages: Message[];
+	assistantMessageId: string;
 };

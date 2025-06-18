@@ -71,7 +71,16 @@ export const chats = pgTable(
 	},
 	(table) => [index('chats_user_id_idx').on(table.userId)]
 );
+
 export const authorRoleEnum = pgEnum('author_role', ['user', 'assistant', 'system']);
+
+export const messageStatusEnum = pgEnum('message_status', [
+	'initialized',
+	'generating',
+	'generated',
+	'stopped',
+	'error'
+]);
 
 export const messages = pgTable(
 	'messages',
@@ -83,7 +92,7 @@ export const messages = pgTable(
 		parentId: uuid().references((): AnyPgColumn => messages.id, { onDelete: 'set null' }),
 		role: authorRoleEnum().notNull(),
 		modelId: uuid().references(() => models.id, { onDelete: 'restrict' }),
-		status: text(),
+		status: messageStatusEnum().notNull().default('initialized'),
 		createdAt: timestamp().defaultNow(),
 		updatedAt: timestamp({ mode: 'date', withTimezone: true }).notNull().defaultNow().$onUpdate(now)
 	},

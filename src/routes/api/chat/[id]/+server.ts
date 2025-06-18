@@ -2,31 +2,20 @@ import type { RequestHandler } from './$types';
 import { db } from '$lib/server/db';
 import * as tables from '$lib/server/db/schema';
 import { eq, and } from 'drizzle-orm';
-import type { Message } from '$lib/server/db/schema';
 import { json } from '@sveltejs/kit';
 import { createOpenAI } from '@ai-sdk/openai';
 import { createAnthropic } from '@ai-sdk/anthropic';
 import { streamText } from 'ai';
 import { transformMessage, writeMessage } from '$lib/server/chat';
 import type { CoreMessage } from 'ai';
+import type { ChatRequestBody } from '$lib/types';
 
-export const POST: RequestHandler = async ({ request, locals }) => {
+export const POST: RequestHandler = async ({ request, locals, params }) => {
 	if (!locals.user) {
 		return json({ error: 'Unauthorized' }, { status: 401 });
 	}
-	const {
-		id,
-		messages,
-		modelId,
-		action,
-		assistantMessageId
-	}: {
-		id: string;
-		modelId: string;
-		action: 'new' | 'regenerate';
-		messages: Message[];
-		assistantMessageId: string;
-	} = await request.json();
+	const { id } = params;
+	const { messages, modelId, action, assistantMessageId }: ChatRequestBody = await request.json();
 
 	const chat = await db.query.chats.findFirst({
 		where: and(eq(tables.chats.id, id), eq(tables.chats.userId, locals.user!.id)),
@@ -76,6 +65,8 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	const apiKey = endpointConfig.userEndpoints[0].apiKey;
 	const modelName = firstEndpoint.endpointModelName;
 
+	// console.log(endpointConfig.name);
+	// console.log(JSON.stringify(messages, null, 2));
 	let aiClient;
 	if (endpointConfig.name === 'OpenAI') {
 		aiClient = createOpenAI({
@@ -90,7 +81,7 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 	}
 
 	const coreMessages: CoreMessage[] = await Promise.all(
-		messages.map((message) => transformMessage(message, locals?.user?.id))
+		messages.map((message) => transformMessage(message, locals.user!.id))
 	);
 
 	const result = streamText({
@@ -102,10 +93,12 @@ export const POST: RequestHandler = async ({ request, locals }) => {
 				chatId: id,
 				userMessage: messages[messages.length - 1],
 				assistantMessageId,
-				assistantText: result.text
+				assistantText: result.text,
+				modelId
 			});
 		},
 		onError: async (error) => {
+			console.error('AI streaming error:', error);
 			// console.error('AI streaming error:', error);
 		}
 	});

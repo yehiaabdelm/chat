@@ -21,8 +21,14 @@
 		Select a model
 	</p>
 	<div class="text-grey-150 grid grid-rows-2 lg:grid-flow-col" style="grid-column-gap: 3rem;">
-		{#each models as model, i}
-			<Model {model} />
+		{#each models as model, i (model.id)}
+			<Model
+				{model}
+				active={model.id === $selectedModel?.id}
+				onclick={() => {
+					selectedModel.set(model);
+				}}
+			/>
 		{/each}
 	</div>
 </div>

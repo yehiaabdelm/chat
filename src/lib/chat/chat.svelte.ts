@@ -1,20 +1,12 @@
 import {
-	fillMessageParts,
 	generateId,
 	type UIMessage,
-	type JSONValue,
-	extractMaxToolInvocationStep,
 	callChatApi,
-	shouldResubmitMessages,
 	type CreateMessage,
-	type ChatRequestOptions,
-	prepareAttachmentsForRequest,
-	getMessageParts
+	type ChatRequestOptions
 } from '@ai-sdk/ui-utils';
 import { isAbortError } from '@ai-sdk/provider-utils';
-import { KeyedChatStore, getChatContext, hasChatContext } from './chat-context.svelte.js';
-import { untrack } from 'svelte';
-import type { Message, Chat as ChatType } from '../types.js';
+import type { Message, Chat as ChatType, ChatRequestBody } from '../types.js';
 import type { UseChatOptions } from './types';
 import { get } from 'svelte/store';
 import { selectedModel } from '$lib/stores/model';
@@ -22,13 +14,6 @@ import { invalidateAll, pushState } from '$app/navigation';
 import type { FileWithUrl, UploadFile } from '$lib/types';
 import { uploadFile, deleteFile } from '$lib/file';
 import { page } from '$app/state';
-
-export type ChatRequest = {
-	headers?: Record<string, string> | Headers;
-	body?: object;
-	messages: Message[];
-	data?: JSONValue;
-};
 
 export type ChatOptions = Readonly<
 	Omit<UseChatOptions, 'keepLastMessageOnError'> & {
@@ -267,12 +252,21 @@ export class Chat {
 
 		try {
 			const userMessageId = this.#generateId();
+			const assistantMessageId = this.#generateId();
+			let parentId;
+			// chat exists so the parent is the last message
+			if (
+				originalMessages.length > 0 &&
+				originalChat?.messages[originalMessages[originalMessages.length - 1]].role === 'assistant'
+			) {
+				parentId = originalMessages[originalMessages.length - 1];
+			}
 			if (!this.#chat) {
-				const rootMessageId = this.#generateId();
-				this.createOptimisticChat(userInput, rootMessageId, userMessageId);
+				parentId = this.#generateId();
+				this.createOptimisticChat(userInput, parentId, userMessageId);
 				const response = await fetch('/api/chat/new', {
 					method: 'POST',
-					body: JSON.stringify({ input: userInput, rootMessageId })
+					body: JSON.stringify({ input: userInput, rootMessageId: parentId })
 				});
 				if (!response.ok) {
 					throw new Error(`Failed to create chat: ${response.status} ${response.statusText}`);
@@ -285,10 +279,6 @@ export class Chat {
 						[newChat.rootMessageId!]: {
 							...newChat.messages[newChat.rootMessageId!],
 							children: [userMessageId]
-						},
-						[userMessageId]: {
-							...this.#chat?.messages[userMessageId],
-							children: []
 						}
 					}
 				};
@@ -297,35 +287,62 @@ export class Chat {
 				invalidateAll();
 			}
 
-			const assistantMessageId = this.#generateId();
-
-			// this.#chat = {
-			// 	...this.#chat,
-			// 	messages: {
-			// 		[userMessageId]: {
-			// 			...this.#chat?.messages[userMessageId],
-			// 			children: [assistantMessageId]
-			// 		},
-			// 		[assistantMessageId]: {
-			// 			id: assistantMessageId,
-			// 			role: 'assistant',
-			// 			contents: [],
-			// 			children: [],
-			// 			model: get(selectedModel),
-			// 			createdAt: new Date(),
-			// 			updatedAt: new Date(),
-			// 			parentId: userMessageId
-			// 		}
-			// 	}
-			// };
-			// this.#messages = this.walk(assistantMessageId, 'backward');
-			// console.log(this.#messages);
+			this.#chat = {
+				...this.#chat,
+				messages: {
+					...this.#chat?.messages,
+					[userMessageId]: {
+						id: userMessageId,
+						createdAt: new Date(),
+						role: 'user',
+						contents: [
+							...(userInput
+								? [{ id: this.#generateId(), type: 'text' as const, text: userInput, file: null }]
+								: []),
+							...this.#getReadyAttachments().map((file) => ({
+								file,
+								...file,
+								text: null,
+								type: 'file' as const
+							}))
+						],
+						children: [assistantMessageId],
+						model: null,
+						updatedAt: new Date(),
+						parentId: parentId
+					},
+					[assistantMessageId]: {
+						id: assistantMessageId,
+						role: 'assistant',
+						contents: [
+							{
+								type: 'text' as const,
+								text: '',
+								file: null
+							}
+						],
+						children: [],
+						status: 'generating',
+						model: get(selectedModel),
+						createdAt: new Date(),
+						updatedAt: new Date(),
+						parentId: userMessageId
+					}
+				}
+			};
+			this.#messages = this.walk(assistantMessageId, 'backward');
 			// Step 4: Now send the actual message (for both new and existing chats)
-			// TODO: Implement actual message sending
-			// await this.sendMessage(userInput);
+			const response = this.#triggerRequest(this.#chat!.id, {
+				action: 'new',
+				messages: [...this.#messages.map((message) => this.#chat!.messages[message])],
+				modelId: get(selectedModel)!.id,
+				assistantMessageId
+			});
 
 			// If the send worked, clear attachments for the next message
 			this.uploadedFiles = [];
+
+			await response;
 		} catch (error) {
 			console.error('Submit failed:', error);
 
@@ -358,28 +375,6 @@ export class Chat {
 			children: [userMessageId]
 		};
 
-		// console.log(this.#getReadyAttachments());
-		const user: Message = {
-			id: userMessageId,
-			createdAt: new Date(),
-			role: 'user',
-			contents: [
-				...(text
-					? [{ id: this.#generateId(), type: 'text' as const, text: text, file: null }]
-					: []),
-				...this.#getReadyAttachments().map((file) => ({
-					file,
-					...file,
-					text: null,
-					type: 'file' as const
-				}))
-			],
-			children: [],
-			model: null,
-			updatedAt: new Date(),
-			parentId: rootMessageId
-		};
-
 		this.#chat = {
 			id: chatId,
 			rootMessageId,
@@ -391,12 +386,12 @@ export class Chat {
 			saved: false,
 			generations: 0,
 			deleteAfter: null,
-			messages: { [root.id]: root, [user.id]: user }
+			messages: { [root.id]: root }
 		};
-		this.#messages = [root.id, user.id];
+		this.#messages = [root.id];
 	}
 
-	#triggerRequest = async (chatRequest: ChatRequest) => {
+	#triggerRequest = async (chatId: string, chatRequest: ChatRequestBody) => {
 		this.#status = 'submitted';
 		this.#error = undefined;
 
@@ -411,26 +406,32 @@ export class Chat {
 			// this.messages = messages;
 
 			await callChatApi({
-				api: `/api/chat/${this.#chat?.id}`,
-				body: {
-					action: 'new',
-					messages,
-					modelId: get(selectedModel)?.id,
-					assistantMessageId: null
-				},
+				api: `/api/chat/${chatId}`,
+				body: chatRequest,
 				streamProtocol: this.#streamProtocol,
 				abortController: () => abortController,
 				restoreMessagesOnFailure: () => {},
 				onResponse: this.#options.onResponse,
 				onUpdate: ({ message, data, replaceLastMessage }) => {
 					this.#status = 'streaming';
+					console.log('Streaming message: ', message.content);
+					this.#chat!.messages[chatRequest.assistantMessageId] = {
+						...this.#chat!.messages[chatRequest.assistantMessageId],
+						contents: [
+							{
+								id: this.#generateId(),
+								type: 'text' as const,
+								text: message.content,
+								file: null
+							}
+						]
+					};
 
-					this.messages = messages;
-					if (replaceLastMessage) {
-						this.messages[this.messages.length - 1] = message;
-					} else {
-						this.messages.push(message);
-					}
+					// if (replaceLastMessage) {
+					// 	this.messages[this.messages.length - 1] = message;
+					// } else {
+					// 	this.messages.push(message);
+					// }
 
 					if (data?.length) {
 						this.data = existingData;
@@ -438,7 +439,12 @@ export class Chat {
 					}
 				},
 				onToolCall: this.#options.onToolCall,
-				onFinish: this.#options.onFinish,
+				onFinish: (message) => {
+					this.#chat!.messages[chatRequest.assistantMessageId] = {
+						...this.#chat!.messages[chatRequest.assistantMessageId],
+						status: 'generated'
+					};
+				},
 				generateId: this.#generateId,
 				fetch: undefined,
 				lastMessage: undefined

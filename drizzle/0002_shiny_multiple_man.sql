@@ -1,1 +1,0 @@
-ALTER TABLE "endpoints" ADD COLUMN "active" boolean DEFAULT true;

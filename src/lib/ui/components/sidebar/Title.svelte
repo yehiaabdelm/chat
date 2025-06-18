@@ -24,24 +24,21 @@
 	let titleOpacity = new Spring(0, { stiffness: 0.1, damping: 0.8 });
 	titleOpacity.set(1);
 
-	let currentRoute = $state(page.url.pathname);
+	let currentRoute = $derived(page.url.pathname);
+
 	let normalizedGeneration = (chat?.generations ?? 0) / maximumGenerations;
 	let adjusted = sigmoid((normalizedGeneration - 0.5) * 10); // Adjust '10' to control the steepness
 	// let sunOpacity = 0.01 + 0.5 * adjusted; // Scale between 0.2 and 0.8
 	let sunOpacity = 0 + 0.9 * adjusted; // Scale between 0.2 and 0.8
 	sunOpacity = 1 - sunOpacity;
 
-	onMount(() => {
-		currentRoute = document.location.pathname;
-	});
-
 	// Hack because when you use pushState, the page.url.pathname is not updated
-	$effect(() => {
-		if (currentRoute) {
-			currentRoute = page.url.pathname;
-			currentRoute = document.location.pathname;
-		}
-	});
+	// $effect(() => {
+	// 	if (currentRoute) {
+	// 		currentRoute = page.url.pathname;
+	// 		currentRoute = document.location.pathname;
+	// 	}
+	// });
 </script>
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->

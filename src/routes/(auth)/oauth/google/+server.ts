@@ -66,7 +66,7 @@ export const GET: RequestHandler = async (event) => {
 		});
 		await tx.insert(table.userEndpoint).values({
 			userId: user.id,
-			endpointId: '77536ae3-c772-4d3d-adca-21d3d084ee93',
+			endpointId: '16a7e064-fe69-4def-adec-346d88d44905',
 			apiKey: env.OPENAI_API_KEY
 		});
 		return { user };

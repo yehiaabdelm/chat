@@ -38,7 +38,7 @@
 		}, 500);
 	};
 	pulse();
-	
+
 	const interval = setInterval(pulse, 1500);
 
 	$effect(() => {

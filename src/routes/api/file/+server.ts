@@ -101,6 +101,8 @@ export const POST: RequestHandler = async ({ locals, request }) => {
 							`data: ${JSON.stringify({
 								id,
 								url,
+								mimeType: file.type,
+								sizeBytes: file.size,
 								status: 'uploaded',
 								progress: 100
 							})}\n\n`

@@ -31,9 +31,11 @@ export const transformMessage = async (message: Message, userId: string): Promis
 				};
 			} else if (part.type === 'file' && part.file?.id) {
 				// For now, only supporting images
+				console.log(part);
+				const extension = part.file.mimeType.split('/')[1];
 				return {
 					type: 'image' as const,
-					image: await generateSignature(`users/${userId}/files/${part.file.id}`)
+					image: await generateSignature(`users/${userId}/files/${part.file.id}.${extension}`)
 				};
 			}
 			return undefined;
@@ -54,13 +56,15 @@ export const writeMessage = async ({
 	chatId,
 	userMessage,
 	assistantMessageId,
-	assistantText
+	assistantText,
+	modelId
 }: {
 	action: 'new' | 'regenerate';
 	chatId: string;
 	userMessage: Message;
 	assistantMessageId: string;
 	assistantText: string;
+	modelId: string;
 }) => {
 	if (action === 'regenerate') {
 		await db.transaction(async (tx) => {
@@ -68,7 +72,8 @@ export const writeMessage = async ({
 				id: assistantMessageId,
 				chatId,
 				role: 'assistant',
-				parentId: userMessage?.id
+				parentId: userMessage?.id,
+				modelId
 			});
 			await tx.insert(tables.contents).values({
 				messageId: assistantMessageId,
@@ -99,7 +104,8 @@ export const writeMessage = async ({
 				id: assistantMessageId,
 				parentId: userMessage?.id,
 				chatId,
-				role: 'assistant'
+				role: 'assistant',
+				modelId
 			});
 			await tx.insert(tables.contents).values({
 				messageId: assistantMessageId,

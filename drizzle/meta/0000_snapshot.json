@@ -1,5 +1,5 @@
 {
-  "id": "a21d5495-ae51-42f1-8550-f29a9b3f2e08",
+  "id": "b1500b08-4751-4a0d-a7a9-13f518bf4816",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -12,7 +12,8 @@
           "name": "id",
           "type": "uuid",
           "primaryKey": true,
-          "notNull": true
+          "notNull": true,
+          "default": "gen_random_uuid()"
         },
         "user_id": {
           "name": "user_id",
@@ -26,8 +27,14 @@
           "primaryKey": false,
           "notNull": true
         },
-        "current_node_id": {
-          "name": "current_node_id",
+        "root_message_id": {
+          "name": "root_message_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "leaf_message_id": {
+          "name": "leaf_message_id",
           "type": "uuid",
           "primaryKey": false,
           "notNull": false
@@ -98,12 +105,25 @@
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "chats_current_node_id_messages_id_fk": {
-          "name": "chats_current_node_id_messages_id_fk",
+        "chats_root_message_id_messages_id_fk": {
+          "name": "chats_root_message_id_messages_id_fk",
           "tableFrom": "chats",
           "tableTo": "messages",
           "columnsFrom": [
-            "current_node_id"
+            "root_message_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "chats_leaf_message_id_messages_id_fk": {
+          "name": "chats_leaf_message_id_messages_id_fk",
+          "tableFrom": "chats",
+          "tableTo": "messages",
+          "columnsFrom": [
+            "leaf_message_id"
           ],
           "columnsTo": [
             "id"
@@ -208,12 +228,6 @@
           "notNull": true,
           "default": "gen_random_uuid()"
         },
-        "user_id": {
-          "name": "user_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
         "name": {
           "name": "name",
           "type": "text",
@@ -233,17 +247,18 @@
           "primaryKey": false,
           "notNull": false
         },
-        "api_key": {
-          "name": "api_key",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
         "config": {
           "name": "config",
           "type": "jsonb",
           "primaryKey": false,
           "notNull": false
+        },
+        "active": {
+          "name": "active",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": true
         },
         "created_at": {
           "name": "created_at",
@@ -261,21 +276,7 @@
         }
       },
       "indexes": {},
-      "foreignKeys": {
-        "endpoints_user_id_user_id_fk": {
-          "name": "endpoints_user_id_user_id_fk",
-          "tableFrom": "endpoints",
-          "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
+      "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},
@@ -292,6 +293,12 @@
           "primaryKey": true,
           "notNull": true,
           "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
         },
         "key": {
           "name": "key",
@@ -319,8 +326,38 @@
           "default": "now()"
         }
       },
-      "indexes": {},
-      "foreignKeys": {},
+      "indexes": {
+        "files_user_id_idx": {
+          "name": "files_user_id_idx",
+          "columns": [
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "files_user_id_user_id_fk": {
+          "name": "files_user_id_user_id_fk",
+          "tableFrom": "files",
+          "tableTo": "user",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},
@@ -350,8 +387,8 @@
           "primaryKey": false,
           "notNull": false
         },
-        "author_role": {
-          "name": "author_role",
+        "role": {
+          "name": "role",
           "type": "author_role",
           "typeSchema": "public",
           "primaryKey": false,
@@ -365,9 +402,11 @@
         },
         "status": {
           "name": "status",
-          "type": "text",
+          "type": "message_status",
+          "typeSchema": "public",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true,
+          "default": "'initialized'"
         },
         "created_at": {
           "name": "created_at",
@@ -459,12 +498,6 @@
           "notNull": true,
           "default": "gen_random_uuid()"
         },
-        "user_id": {
-          "name": "user_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": false
-        },
         "name": {
           "name": "name",
           "type": "text",
@@ -483,6 +516,12 @@
           "primaryKey": false,
           "notNull": true,
           "default": "'{\"text\"}'"
+        },
+        "vendor_id": {
+          "name": "vendor_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
         },
         "active": {
           "name": "active",
@@ -508,12 +547,12 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "models_user_id_user_id_fk": {
-          "name": "models_user_id_user_id_fk",
+        "models_vendor_id_vendors_id_fk": {
+          "name": "models_vendor_id_vendors_id_fk",
           "tableFrom": "models",
-          "tableTo": "user",
+          "tableTo": "vendors",
           "columnsFrom": [
-            "user_id"
+            "vendor_id"
           ],
           "columnsTo": [
             "id"
@@ -767,6 +806,107 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+    "public.user_endpoint": {
+      "name": "user_endpoint",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "endpoint_id": {
+          "name": "endpoint_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "api_key": {
+          "name": "api_key",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "user_endpoint_key_unique": {
+          "name": "user_endpoint_key_unique",
+          "columns": [
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "endpoint_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "user_endpoint_user_id_user_id_fk": {
+          "name": "user_endpoint_user_id_user_id_fk",
+          "tableFrom": "user_endpoint",
+          "tableTo": "user",
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "user_endpoint_endpoint_id_endpoints_id_fk": {
+          "name": "user_endpoint_endpoint_id_endpoints_id_fk",
+          "tableFrom": "user_endpoint",
+          "tableTo": "endpoints",
+          "columnsFrom": [
+            "endpoint_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.user": {
       "name": "user",
       "schema": "",
@@ -808,6 +948,20 @@
           "primaryKey": false,
           "notNull": false
         },
+        "message_window": {
+          "name": "message_window",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 5
+        },
+        "temp_chat_delete_hours": {
+          "name": "temp_chat_delete_hours",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 24
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp with time zone",
@@ -831,6 +985,54 @@
           "nullsNotDistinct": false,
           "columns": [
             "email"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.vendors": {
+      "name": "vendors",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "vendors_name_unique": {
+          "name": "vendors_name_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "name"
           ]
         }
       },
@@ -863,6 +1065,17 @@
       "values": [
         "openai",
         "anthropic"
+      ]
+    },
+    "public.message_status": {
+      "name": "message_status",
+      "schema": "public",
+      "values": [
+        "initialized",
+        "generating",
+        "generated",
+        "stopped",
+        "error"
       ]
     },
     "public.modality": {

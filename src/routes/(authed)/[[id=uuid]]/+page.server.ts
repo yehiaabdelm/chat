@@ -78,6 +78,7 @@ export const load = (async ({ params, locals }) => {
 			redirect(302, '/');
 		}
 
+		console.log(JSON.stringify(chat.messages, null, 2));
 		await Promise.all(
 			chat.messages.map((msg) =>
 				Promise.all(

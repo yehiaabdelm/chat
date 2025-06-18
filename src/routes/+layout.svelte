@@ -4,6 +4,7 @@
 	let { children } = $props();
 
 	$effect(() => {
+		let diff = 2;
 		document.documentElement.style.setProperty(
 			'--theme-color',
 			`${$currentTheme.backgroundColor.r}, ${$currentTheme.backgroundColor.g}, ${$currentTheme.backgroundColor.b}`
@@ -11,6 +12,10 @@
 		document.documentElement.style.setProperty(
 			'--sidebar-color',
 			`${$currentTheme.sidebarColor.r}, ${$currentTheme.sidebarColor.g}, ${$currentTheme.sidebarColor.b}`
+		);
+		document.documentElement.style.setProperty(
+			'--settings-background-color',
+			`${$currentTheme.backgroundColor.r - diff}, ${$currentTheme.backgroundColor.g - diff}, ${$currentTheme.backgroundColor.b - diff}`
 		);
 	});
 </script>

@@ -1,0 +1,39 @@
+name: Apply schema migrations
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  apply_migrations:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install dependencies & tooling
+        run: |
+          npm install
+          npm install -g drizzle-orm drizzle-kit pg
+
+      - name: Set up SSH tunnel
+        run: |
+          install -m 600 -D /dev/null ~/.ssh/id_ed25519
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+          ssh-keyscan -H ${{ secrets.SSH_HOST }} > ~/.ssh/known_hosts
+
+          # Tunnel local port 5433 to remote DB via EC2
+          nohup ssh -f -N \
+            -i ~/.ssh/id_ed25519 \
+            -o StrictHostKeyChecking=no \
+            -L 5433:localhost:5432 \
+            ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}
+
+      - name: Run migrations through tunnel
+        run: drizzle-kit migrate
+        env:
+          DATABASE_URL: postgres://${{ secrets.DATABASE_USER }}:${{ secrets.DATABASE_PASSWORD }}@localhost:5433/${{ secrets.DATABASE_NAME }}
+
+      - name: Clean up SSH
+        run: rm -rf ~/.ssh

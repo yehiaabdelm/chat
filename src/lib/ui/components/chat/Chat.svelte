@@ -7,6 +7,7 @@
 	import ErrorMessage from '../ErrorMessage.svelte';
 	import ModelsPanel from './ModelsPanel.svelte';
 	import BottomModelsPanel from './BottomModelsPanel.svelte';
+	import { beforeNavigate } from '$app/navigation';
 	import { v7 as uuid } from 'uuid';
 
 	let {
@@ -31,11 +32,10 @@
 	};
 
 	let chatContainer: HTMLDivElement;
-	let input = $state('');
-	let isChatOpen = $state(true);
 
-	// $effect(() => {
-	// });
+	beforeNavigate(() => {
+		chatUtilities.stop();
+	});
 </script>
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->

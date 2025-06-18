@@ -84,6 +84,9 @@ export const writeMessage = async ({
 				type: 'text',
 				text: assistantText
 			});
+			await tx.update(tables.chats).set({
+				leafMessageId: assistantMessageId
+			}).where(eq(tables.chats.id, chatId));
 		});
 	} else if (action === 'new') {
 		await db.transaction(async (tx) => {
@@ -116,6 +119,9 @@ export const writeMessage = async ({
 				type: 'text',
 				text: assistantText
 			});
+			await tx.update(tables.chats).set({
+				leafMessageId: userMessage?.id
+			}).where(eq(tables.chats.id, chatId));
 		});
 	} else {
 		throw new Error('Invalid action');

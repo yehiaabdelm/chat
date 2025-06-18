@@ -528,7 +528,17 @@ export class Chat {
 			this.#status = 'ready';
 		} catch (error) {
 			if (isAbortError(error)) {
-				// Send a request to the server to save the message up until the last point
+				await fetch(`/api/chat/${chatId}/stop`, {
+					method: 'POST',
+					body: JSON.stringify({
+						action: chatRequest.action,
+						chatId,
+						userMessage: chatRequest.messages[chatRequest.messages.length - 1],
+						assistantMessageId: chatRequest.assistantMessageId,
+						assistantText: this.#chat!.messages[chatRequest.assistantMessageId] .contents[0].text,
+						modelId: get(selectedModel)!.id
+					})
+				});
 				return;
 			}
 

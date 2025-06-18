@@ -9,13 +9,13 @@
 @font-face {
 	font-family: 'Untitled Sans';
 	font-weight: normal;
-	src: url('/fonts/untitled-sans/untitled-sans-regular.woff2') format('woff2');
+	src: url('/fonts/PublicSans-VariableFont_wght.ttf') format('woff2');
 }
 
 @font-face {
 	font-family: 'Gill Sans';
 	font-weight: normal;
-	src: url('/fonts/gill-sans/GillSans-01.woff2') format('woff2');
+	src: url('/fonts/SansGuiltMB.otf') format('otf');
 }
 
 @utility no-scrollbar {

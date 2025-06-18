@@ -145,6 +145,7 @@
 		<div class="flex w-full justify-between">
 			<a
 				class="font-gill text-grey-400 hover:text-grey-100 self-end text-[0.6rem] tracking-[2px] uppercase antialiased duration-200 ease-in-out"
+				target="_blank"
 				href={PUBLIC_STRIPE_DONATION_LINK}>donate</a
 			>
 			<div

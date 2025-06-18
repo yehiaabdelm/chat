@@ -23,7 +23,7 @@
 		}}
 	/>
 	<div
-		class="text-grey-450 font-gill flex items-center pb-[0.05rem] text-xs tracking-[3px] antialiased"
+		class="text-grey-450 font-gill flex items-center pb-0.75 text-sm tracking-[3px] antialiased"
 		style="transform: translateX(0.06rem);"
 	>
 		<span>{activeIndex + 1}</span>/<span>{siblings.length}</span>

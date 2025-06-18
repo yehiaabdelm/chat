@@ -124,11 +124,11 @@
 			<div class="flex items-center">
 				{#if message.role === 'user'}
 					<p
-						class="font-gill text-grey-100 pt-[0.07rem] pr-2 text-[0.68rem] tracking-[2px] uppercase antialiased"
+						class="font-gill text-grey-100 pt-[0.07rem] pr-2 text-xs tracking-[2px] uppercase antialiased"
 					>
 						{user?.firstName ?? 'user'}
 					</p>
-					<div class="flex h-3 items-center">
+					<div class="flex h-3 items-center pt-0.5">
 						{#if editMode}
 							<div
 								class="absolute flex gap-1"
@@ -162,11 +162,11 @@
 					</div>
 				{:else}
 					<p
-						class="font-gill text-grey-100 pt-[0.07rem] pr-2 text-[0.68rem] tracking-[2px] uppercase antialiased"
+						class="font-gill text-grey-100 pt-[0.07rem] pr-2 text-xs tracking-[2px] uppercase antialiased"
 					>
 						{message.model?.name}
 					</p>
-					<div class="flex h-3 gap-1">
+					<div class="flex h-3 gap-1 pt-0.5">
 						{#if message.status === 'generating'}
 							<Stop onclick={stop} />
 						{:else}

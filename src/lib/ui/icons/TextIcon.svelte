@@ -100,7 +100,7 @@
 		<p
 			class="font-gill uppercase {textColor
 				? 'text-[rgb(205,86,39)]'
-				: 'text-grey-300'} text-[0.63rem] tracking-[3px] antialiased"
+				: 'text-grey-300'} text-xs tracking-[3px] antialiased"
 		>
 			{text}
 		</p>
@@ -136,7 +136,7 @@
 		<p
 			class="font-gill uppercase {textColor
 				? 'text-[rgb(205,86,39)]'
-				: 'text-grey-300'} text-[0.63rem] tracking-[3px] antialiased"
+				: 'text-grey-300'} pb-0.5 text-xs tracking-[3px] antialiased"
 		>
 			{text}
 		</p>

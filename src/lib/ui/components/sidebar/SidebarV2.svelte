@@ -146,10 +146,11 @@
             ml-2
             w-full
             bg-transparent
-            text-[0.7rem]
-            tracking-[0.1rem]
-            uppercase antialiased
-            placeholder:text-[0.7rem]
+            pb-0.5
+            text-sm
+            tracking-[0.1rem] uppercase
+            antialiased
+			placeholder:text-sm
             placeholder:tracking-[0.1rem]
             placeholder:uppercase
             placeholder:antialiased
@@ -171,7 +172,7 @@
 	>
 		{#if saved && chats.filter((chat) => chat.saved).length > 0}
 			<p
-				class="font-gill text-grey-400 sticky top-0 z-30 pt-3 pb-1 pl-3 text-[0.65rem] tracking-[2px] uppercase antialiased"
+				class="font-gill text-grey-400 sticky top-0 z-30 pt-3 pb-1 pl-3 text-[0.8rem] tracking-[2px] uppercase antialiased"
 				style="background-color: rgb(var(--sidebar-color)); transition: background-color 1s ease, box-shadow 1s ease;"
 			>
 				Pinned chats
@@ -184,7 +185,7 @@
 			{#each categorizedTitles as [category, categoryTitles]}
 				<div class="border-b-grey-1100 border-b pt-2 pb-3" style="opacity: {titlesOpacity.current}">
 					<p
-						class="font-gill text-grey-400 sticky top-0 z-30 pt-3 pb-1 pl-3 text-[0.65rem] tracking-[2px] uppercase antialiased"
+						class="font-gill text-grey-400 sticky top-0 z-30 pt-3 pb-1 pl-3 text-[0.8rem] tracking-[2px] uppercase antialiased"
 						style="background-color: rgb(var(--sidebar-color)); transition: background-color 1s ease, box-shadow 1s ease;"
 					>
 						{category}
@@ -200,7 +201,7 @@
 			{/each}
 		{:else}
 			<p
-				class="text-grey-500 font-gill absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center text-[0.7rem] tracking-[2px] uppercase antialiased"
+				class="text-grey-500 font-gill absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center text-xs tracking-[2px] uppercase antialiased"
 			>
 				No chats yet
 			</p>

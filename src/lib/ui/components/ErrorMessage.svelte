@@ -22,6 +22,6 @@
 		<div class="pl-1">
 			<Error />
 		</div>
-		<p class="text-2xs text-red-100 uppercase antialiased">{message}</p>
+		<p class="text-xs text-red-100 uppercase antialiased">{message}</p>
 	</div>
 </div>

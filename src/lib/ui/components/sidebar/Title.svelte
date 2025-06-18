@@ -68,8 +68,8 @@
 			href="/{chat.id}"
 			class="font-gill truncate uppercase {currentRoute === `/${chat.id}`
 				? 'text-grey-200'
-				: 'text-grey-450'} hover:text-grey-200 w-full text-xs
-		tracking-[1.5px] antialiased transition-colors ease-linear"
+				: 'text-grey-450'} hover:text-grey-200 w-full pb-0.5
+		text-sm tracking-[1.5px] antialiased transition-colors ease-linear"
 		>
 			{chat.title}
 		</a>

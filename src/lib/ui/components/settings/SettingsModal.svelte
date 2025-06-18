@@ -71,7 +71,7 @@
 						<tr>
 							<td class="w-1/3 p-2">
 								<p
-									class="font-gill text-grey-100 bg-transparent py-1 text-[0.7rem] tracking-[2px] uppercase antialiased"
+									class="font-gill text-grey-100 bg-transparent py-1 text-sm tracking-[2px] uppercase antialiased"
 								>
 									API Keys
 								</p>
@@ -82,12 +82,12 @@
 							<td class="w-1/3 p-2">
 								<div class="flex min-w-0 shrink flex-col self-start">
 									<p
-										class="font-gill text-grey-100 bg-transparent py-1 text-[0.7rem] tracking-[2px] uppercase antialiased"
+										class="font-gill text-grey-100 bg-transparent py-1 text-xs tracking-[2px] uppercase antialiased"
 									>
 										Models
 									</p>
 									<p
-										class="font-public text-grey-425 bg-transparent py-1 text-[0.7rem] leading-4 antialiased"
+										class="font-public text-grey-425 bg-transparent py-1 text-xs leading-4 antialiased"
 									>
 										Select the models you want to use.
 									</p>
@@ -103,7 +103,7 @@
 							<td class="w-1/3 p-2">
 								<div class="flex min-w-0 shrink flex-col self-start">
 									<p
-										class="font-gill text-grey-100 bg-transparent py-1 text-[0.7rem] tracking-[2px] uppercase antialiased"
+										class="font-gill text-grey-100 bg-transparent py-1 text-sm tracking-[2px] uppercase antialiased"
 									>
 										time to delete
 									</p>
@@ -122,12 +122,12 @@
 							<td class="w-1/3 p-2">
 								<div class="flex min-w-0 shrink flex-col self-start">
 									<p
-										class="font-gill text-grey-100 bg-transparent py-1 text-[0.7rem] tracking-[2px] uppercase antialiased"
+										class="font-gill text-grey-100 bg-transparent py-1 text-sm tracking-[2px] uppercase antialiased"
 									>
 										message window limit
 									</p>
 									<p
-										class="font-public text-grey-425 bg-transparent py-1 text-[0.7rem] leading-4 antialiased"
+										class="font-public text-grey-425 bg-transparent py-1 text-xs leading-4 antialiased"
 									>
 										Reduce model usage costs by limiting its window to the most recent 10 messages.
 										Default: 10
@@ -144,13 +144,11 @@
 		</div>
 		<div class="flex w-full justify-between">
 			<a
-				class="font-gill text-grey-400 hover:text-grey-100 self-end text-[0.6rem] tracking-[2px] uppercase antialiased duration-200 ease-in-out"
+				class="font-gill text-grey-400 hover:text-grey-100 self-end text-xs tracking-[2px] uppercase antialiased duration-200 ease-in-out"
 				target="_blank"
 				href={PUBLIC_STRIPE_DONATION_LINK}>donate</a
 			>
-			<div
-				class="*:font-gill flex flex-col *:text-[0.6rem] *:tracking-[2px] *:uppercase *:antialiased"
-			>
+			<div class="*:font-gill flex flex-col *:text-xs *:tracking-[2px] *:uppercase *:antialiased">
 				<p class="text-grey-400 self-end">contact us</p>
 				<p class="text-grey-600">support@teletyped.com</p>
 			</div>

@@ -8,14 +8,17 @@
 
 @font-face {
 	font-family: 'Public Sans';
-	font-weight: normal;
-	src: url('/fonts/PublicSans-VariableFont_wght.ttf') format('ttf');
+	font-weight: 100 900;
+	font-style: normal;
+	font-display: swap;
+	src: url('/fonts/PublicSans-VariableFont_wght.ttf') format('truetype');
 }
 
 @font-face {
 	font-family: 'Gill Sans';
 	font-weight: normal;
-	src: url('/fonts/SansGuiltMB.otf') format('otf');
+	font-display: swap;
+	src: url('/fonts/SansGuiltMB.otf') format('opentype');
 }
 
 @utility no-scrollbar {

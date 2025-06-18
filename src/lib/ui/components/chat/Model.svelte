@@ -50,7 +50,7 @@
 		{/if}
 	</div>
 	<p
-		class="text-grey-150 font-gill hover:text-grey-150 text-start text-[0.65rem] tracking-[2.5px] whitespace-nowrap uppercase antialiased"
+		class="text-grey-150 font-gill hover:text-grey-150 text-start text-xs tracking-[2.5px] whitespace-nowrap uppercase antialiased"
 	>
 		{model?.name}
 	</p>

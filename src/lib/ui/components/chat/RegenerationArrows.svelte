@@ -18,6 +18,7 @@
 	<ArrowLeft
 		disabled={activeIndex === 0}
 		onclick={() => {
+			if (activeIndex === 0) return;
 			navigate(siblings[activeIndex - 1]);
 		}}
 	/>
@@ -30,6 +31,7 @@
 	<ArrowRight
 		disabled={activeIndex === siblings.length - 1}
 		onclick={() => {
+			if (activeIndex === siblings.length - 1) return;
 			navigate(siblings[activeIndex + 1]);
 		}}
 	/>

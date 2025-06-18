@@ -100,3 +100,22 @@ export type ChatRequestBody = {
 	messages: Message[];
 	assistantMessageId: string;
 };
+
+export type Endpoint = {
+	name: string;
+	endpointType: 'openai' | 'anthropic';
+	endpointName: string;
+	baseUrl: string;
+	models: {
+		name: string;
+		vendor: string;
+		description: string;
+		modalities: ('text' | 'image' | 'audio')[];
+		apiModelName: string;
+	}[];
+};
+
+export type Vendor = {
+	name: string;
+	endpoints: Endpoint[];
+};

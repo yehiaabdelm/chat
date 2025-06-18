@@ -120,7 +120,7 @@ export const writeMessage = async ({
 				text: assistantText
 			});
 			await tx.update(tables.chats).set({
-				leafMessageId: userMessage?.id
+				leafMessageId: assistantMessageId
 			}).where(eq(tables.chats.id, chatId));
 		});
 	} else {

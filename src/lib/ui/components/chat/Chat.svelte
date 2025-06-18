@@ -35,7 +35,6 @@
 	let isChatOpen = $state(true);
 
 	// $effect(() => {
-	// 	console.log('chatUtilities.chat', chatUtilities.chat);
 	// });
 </script>
 

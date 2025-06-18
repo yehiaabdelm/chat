@@ -440,7 +440,6 @@ export class Chat {
 				onResponse: this.#options.onResponse,
 				onUpdate: ({ message, data, replaceLastMessage }) => {
 					this.#status = 'streaming';
-					console.log('Streaming message: ', message.content);
 					this.#chat!.messages[chatRequest.assistantMessageId] = {
 						...this.#chat!.messages[chatRequest.assistantMessageId],
 						contents: [

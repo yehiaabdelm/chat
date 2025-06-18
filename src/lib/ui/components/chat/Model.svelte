@@ -18,10 +18,6 @@
 				return Anthropic;
 			// case 'google':
 			// 	return Google;
-			// case 'mistral':
-			// 	return Mistral;
-			// case 'meta':
-			// 	return Meta;
 			default:
 				return OpenAI;
 		}

@@ -100,6 +100,9 @@ jobs:
           Environment=AWS_REGION=${{ secrets.AWS_REGION }}
           Environment=OPENAI_API_KEY=${{ secrets.OPENAI_API_KEY }}
           Environment=DATABASE_URL=${{ secrets.DATABASE_URL }}
+          Environment=PUBLIC_BASE_URL=${{ secrets.PUBLIC_BASE_URL }}
+          Environment=GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
+          Environment=GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
           ExecStart=/opt/node /opt/app/build
           Restart=on-failure
           [Install]

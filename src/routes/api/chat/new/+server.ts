@@ -3,6 +3,7 @@ import type { RequestHandler } from './$types';
 import { json } from '@sveltejs/kit';
 import { eq } from 'drizzle-orm';
 import * as tables from '$lib/server/db/schema';
+import { generateAndUpdateTitle } from '$lib/server/chat';
 
 export const POST: RequestHandler = async ({ locals, request }) => {
 	if (!locals.user) {
@@ -44,6 +45,6 @@ export const POST: RequestHandler = async ({ locals, request }) => {
 			}
 		};
 	});
-
+	generateAndUpdateTitle(chat.id, locals.user.id, input);
 	return json(chat);
 };

@@ -20,7 +20,10 @@
 	});
 </script>
 
-<div class="h-dvh w-full bg-[rgb(var(--theme-color))]" style:transition="background-color 1s ease">
+<div
+	class="h-dvh w-full bg-[rgb(var(--theme-color))] antialiased"
+	style:transition="background-color 1s ease"
+>
 	{@render children()}
 </div>
 

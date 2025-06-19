@@ -151,6 +151,12 @@ export class Chat {
 	 * @param id The id of the message to regenerate from
 	 */
 	regenerate = (id: string): void => {
+		// Ensure a model is selected before proceeding
+		const model = get(selectedModel);
+		if (!model) {
+			this.setError(new Error('No model selected'));
+			return;
+		}
 		const messagesIds: string[] = this.walk(id, 'backward');
 		const messages: Message[] = messagesIds.map(
 			(messageId) => this.#chat?.messages[messageId] as Message
@@ -179,7 +185,7 @@ export class Chat {
 					],
 					children: [],
 					status: 'generating',
-					model: get(selectedModel),
+					model,
 					createdAt: new Date(),
 					updatedAt: new Date(),
 					parentId: id
@@ -190,7 +196,7 @@ export class Chat {
 		this.#triggerRequest(this.#chat!.id, {
 			action: 'regenerate',
 			messages: messages,
-			modelId: get(selectedModel)!.id,
+			modelId: model.id,
 			assistantMessageId
 		});
 	};
@@ -200,6 +206,12 @@ export class Chat {
 	 * @param id The id of the message to navigate from
 	 */
 	editAndRegenerate = (id: string, parentId: string, editText: string): void => {
+		// Ensure a model is selected before proceeding
+		const model = get(selectedModel);
+		if (!model) {
+			this.setError(new Error('No model selected'));
+			return;
+		}
 		const newMessageId = this.#generateId();
 		const assistantMessageId = this.#generateId();
 		this.#chat = {
@@ -229,7 +241,7 @@ export class Chat {
 					contents: [{ type: 'text' as const, text: '', file: null }],
 					children: [],
 					status: 'generating',
-					model: get(selectedModel),
+					model,
 					createdAt: new Date(),
 					updatedAt: new Date(),
 					parentId: newMessageId
@@ -241,7 +253,7 @@ export class Chat {
 		this.#triggerRequest(this.#chat!.id, {
 			action: 'new',
 			messages: this.#messages.map((messageId) => this.#chat!.messages[messageId]).slice(0, -1),
-			modelId: get(selectedModel)!.id,
+			modelId: model.id,
 			assistantMessageId
 		});
 	};
@@ -317,6 +329,12 @@ export class Chat {
 
 	/** Form submission handler to automatically reset input and append a user message */
 	submit = async (event?: { preventDefault?: () => void }, options: ChatRequestOptions = {}) => {
+		// Ensure a model is selected before proceeding
+		const model = get(selectedModel);
+		if (!model) {
+			this.setError(new Error('No model selected'));
+			return;
+		}
 		event?.preventDefault?.();
 
 		const attachments = this.#getReadyAttachments();
@@ -388,7 +406,7 @@ export class Chat {
 							}))
 						],
 						children: [assistantMessageId],
-						model: null,
+						model,
 						updatedAt: new Date(),
 						parentId: parentId
 					},
@@ -404,7 +422,7 @@ export class Chat {
 						],
 						children: [],
 						status: 'generating',
-						model: get(selectedModel),
+						model,
 						createdAt: new Date(),
 						updatedAt: new Date(),
 						parentId: userMessageId
@@ -416,7 +434,7 @@ export class Chat {
 			const response = this.#triggerRequest(this.#chat!.id, {
 				action: 'new',
 				messages: [...this.#messages.map((message) => this.#chat!.messages[message])].slice(0, -1),
-				modelId: get(selectedModel)!.id,
+				modelId: model.id,
 				assistantMessageId
 			});
 
@@ -436,8 +454,7 @@ export class Chat {
 			this.input = userInput;
 
 			// Set error state
-			this.#error = error instanceof Error ? error : new Error(String(error));
-			this.#status = 'error';
+			this.setError(error instanceof Error ? error : new Error(String(error)));
 		}
 	};
 
@@ -480,6 +497,9 @@ export class Chat {
 			const abortController = new AbortController();
 			this.#abortController = abortController;
 
+			if (get(selectedModel) === null || get(selectedModel) === undefined) {
+				throw new Error('No model selected');
+			}
 			await callChatApi({
 				api: `/api/chat/${chatId}`,
 				body: chatRequest,
@@ -551,8 +571,23 @@ export class Chat {
 				this.#options.onError(coalescedError);
 			}
 
-			this.#status = 'error';
-			this.#error = coalescedError;
+			this.setError(coalescedError);
 		}
 	};
+
+	/**
+	 * Centralized error setter that automatically resets the error
+	 * state back to "ready" after a brief delay so the UI is usable
+	 * again without manual intervention.
+	 */
+	private setError(error: Error, resetAfterMs = 2500) {
+		this.#error = error;
+		this.#status = 'error';
+		if (resetAfterMs > 0) {
+			setTimeout(() => {
+				this.#error = undefined;
+				this.#status = 'ready';
+			}, resetAfterMs);
+		}
+	}
 }

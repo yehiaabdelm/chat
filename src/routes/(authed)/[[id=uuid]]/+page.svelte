@@ -47,6 +47,9 @@
 				unattachedFiles={data.unattachedFiles}
 				models={data.models}
 				user={data.user}
+				openSettings={() => {
+					showModal = true;
+				}}
 			/>
 		{/key}
 	</div>

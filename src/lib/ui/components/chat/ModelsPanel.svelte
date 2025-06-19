@@ -1,8 +1,8 @@
 <script lang="ts">
 	import type { Model } from '$lib/types';
-	let { models }: { models: Model[] } = $props();
 	import ModelComponent from './Model.svelte';
 	import { Spring } from 'svelte/motion';
+	let { models, openSettings }: { models: Model[]; openSettings: () => void } = $props();
 
 	const initialOpacity = 0;
 	const opacity = new Spring(initialOpacity, { stiffness: 0.1, damping: 0.8 });
@@ -15,9 +15,12 @@
 <div class="flex flex-col items-center gap-y-4" style="opacity: {opacity.current}">
 	{#if models.length === 0}
 		<div class="flex flex-col items-center gap-y-3 text-center">
-			<p class="font-gill text-grey-300 text-xs tracking-[3px] uppercase">No models available</p>
-			<p class="font-public text-grey-400 max-w-sm text-sm">
-				Add an API key in settings to start using Teletyped
+			<p class="font-gill text-grey-200 text-xs tracking-[3px] uppercase">No models available</p>
+			<p class="font-public text-grey-400 max-w-sm text-sm antialiased">
+				Add an API key in <button onclick={openSettings} class="cursor-pointer font-semibold"
+					>settings</button
+				>
+				to start using Teletyped
 			</p>
 		</div>
 	{:else}

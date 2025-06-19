@@ -14,8 +14,15 @@
 		models,
 		chat,
 		unattachedFiles = [],
-		user
-	}: { models: Model[]; chat?: ChatType; unattachedFiles: FileWithUrl[]; user: User } = $props();
+		user,
+		openSettings
+	}: {
+		models: Model[];
+		chat?: ChatType;
+		unattachedFiles: FileWithUrl[];
+		user: User;
+		openSettings: () => void;
+	} = $props();
 
 	let isDragging = $state(false);
 	let textAreaHeight = $state(0);
@@ -23,7 +30,10 @@
 	let chatUtilities = new ChatV2({
 		initialChat: chat,
 		initialUploadedFiles: unattachedFiles,
-		generateId: uuid
+		generateId: uuid,
+		onError: (error) => {
+			errorMessage = error.message;
+		}
 	});
 
 	const handleDrop = (event: DragEvent) => {
@@ -81,7 +91,7 @@
 			</div>
 		{:else}
 			<div class="flex flex-1 flex-col items-center justify-center" style="opacity: 1;">
-				<ModelsPanel {models} />
+				<ModelsPanel {models} {openSettings} />
 			</div>
 		{/if}
 		<div
@@ -89,8 +99,8 @@
       justify-center rounded-xl bg-[rgba(var(--theme-color),1)] placeholder:text-center"
 			style="transition: box-shadow 1s ease, background-color 1s ease; backdrop-filter: blur(10px); box-shadow: 0px 2px 30px 20px rgba(var(--theme-color), 1);"
 		>
-			{#if chatUtilities.errorMessage}
-				<ErrorMessage message={chatUtilities.errorMessage} />
+			{#if chatUtilities.error}
+				<ErrorMessage message={chatUtilities.error.message} />
 			{/if}
 			<div class="relative">
 				<FileUploadArea

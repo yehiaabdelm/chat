@@ -4,7 +4,7 @@
 
 <div class="flex h-screen items-center justify-center">
 	<div
-		class="font-gill text-grey-100 flex flex-col items-center gap-2 text-xl tracking-wide uppercase antialiased"
+		class="font-gill text-grey-100 flex flex-col items-center gap-2 text-xl tracking-[3px] uppercase antialiased"
 	>
 		<p>{page.status}</p>
 		<p>{page.error?.message}</p>

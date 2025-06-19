@@ -14,7 +14,7 @@
 </script>
 
 <div
-	class=" font-gill fixed bottom-20 z-0 mb-[12px] inline-flex items-center self-start rounded-lg bg-[rgb(155,11,11)]/10 tracking-wide"
+	class=" font-gill fixed bottom-20 z-0 mb-[12px] inline-flex items-center self-start rounded-lg bg-[rgb(155,11,11)]/10 tracking-[3px]"
 	in:fly={{ y: 40, duration: 1000, easing: springEasingFunction }}
 	out:fly={{ y: 40, duration: 1000, easing: springEasingFunction }}
 >

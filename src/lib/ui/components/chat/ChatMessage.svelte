@@ -20,24 +20,24 @@
 		message,
 		siblings,
 		last,
-		loading,
 		user,
 		scrollToMessage = false,
 		navigate,
 		regenerate,
 		editRegenerate,
-		stop
+		stop,
+		status
 	}: {
 		message: Message;
 		siblings: string[];
 		last: boolean;
-		loading: boolean;
 		user: User;
 		scrollToMessage?: boolean;
 		navigate: (id: string) => void;
 		regenerate: (id: string) => void;
 		editRegenerate: (id: string, parentId: string, editText: string) => void;
 		stop: () => void;
+		status: 'submitted' | 'streaming' | 'ready' | 'error';
 	} = $props();
 
 	let messageElement: HTMLDivElement;
@@ -136,6 +136,7 @@
 							>
 								<Submit
 									text="submit"
+									disabled={status === 'streaming'}
 									onclick={() => {
 										editRegenerate(message.id, message?.parentId, editText);
 									}}
@@ -176,7 +177,7 @@
 							>
 								<Regenerate
 									onclick={() => regenerate(message?.parentId ?? '')}
-									disabled={loading}
+									disabled={status === 'streaming'}
 								/>
 								<Copy
 									status={copyStatus}

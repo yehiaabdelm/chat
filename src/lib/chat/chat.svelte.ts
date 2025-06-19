@@ -528,6 +528,10 @@ export class Chat {
 			this.#status = 'ready';
 		} catch (error) {
 			if (isAbortError(error)) {
+				this.#chat!.messages[chatRequest.assistantMessageId] = {
+					...this.#chat!.messages[chatRequest.assistantMessageId],
+					status: 'stopped'
+				};
 				await fetch(`/api/chat/${chatId}/stop`, {
 					method: 'POST',
 					body: JSON.stringify({
@@ -535,7 +539,7 @@ export class Chat {
 						chatId,
 						userMessage: chatRequest.messages[chatRequest.messages.length - 1],
 						assistantMessageId: chatRequest.assistantMessageId,
-						assistantText: this.#chat!.messages[chatRequest.assistantMessageId] .contents[0].text,
+						assistantText: this.#chat!.messages[chatRequest.assistantMessageId].contents[0].text,
 						modelId: get(selectedModel)!.id
 					})
 				});

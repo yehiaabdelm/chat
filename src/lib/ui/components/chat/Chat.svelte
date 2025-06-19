@@ -69,11 +69,11 @@
 								? (chatUtilities.chat?.messages[chatUtilities.chat?.messages[messageId].parentId]
 										?.children ?? [])
 								: []}
-							loading={false}
 							navigate={chatUtilities.navigate}
 							regenerate={chatUtilities.regenerate}
 							editRegenerate={chatUtilities.editAndRegenerate}
 							stop={chatUtilities.stop}
+							status={chatUtilities.status}
 							last={i === chatUtilities.messages.length - 1}
 						/>
 					{/if}

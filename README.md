@@ -1,6 +1,6 @@
 # Teletyped Chat
 
-Open source chat app by https://teletyped.com. Try it here: https://chat.teletyped.com. You're free to try/use it, however, it's still a WIP.
+Open source chat app by https://teletyped.com. Try it here: https://chat.teletyped.com
 
 
 ## Development
